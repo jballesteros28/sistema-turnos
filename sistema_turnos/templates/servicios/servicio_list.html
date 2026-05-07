@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Servicios | Sistema de turnos{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/servicios.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/servicios.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Servicios</p>
+        <h1>Servicios</h1>
+    </div>
+    <a class="button" href="{% url 'servicios:crear' %}">Nuevo servicio</a>
+</section>
+
+<form class="toolbar toolbar-servicios" method="get">
+    <input class="input" type="search" name="q" value="{{ query }}" placeholder="Buscar servicios">
+    <select class="input" name="estado">
+        <option value="">Todos los estados</option>
+        {% for value, label in estados %}
+            <option value="{{ value }}" {% if value == estado_actual %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <select class="input" name="negocio">
+        <option value="">Todos los negocios</option>
+        {% for negocio in negocios %}
+            <option value="{{ negocio.pk }}" {% if negocio.pk|stringformat:"s" == negocio_actual %}selected{% endif %}>{{ negocio.nombre }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Buscar</button>
+    {% if query or estado_actual or negocio_actual %}
+        <a class="button button-secondary" href="{% url 'servicios:lista' %}">Limpiar</a>
+    {% endif %}
+</form>
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Servicio</th>
+                <th>Negocio</th>
+                <th>Duracion</th>
+                <th>Precio</th>
+                <th>Estado</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for servicio in servicios %}
+                <tr>
+                    <td>
+                        <a href="{% url 'servicios:detalle' servicio.pk %}">{{ servicio.nombre }}</a>
+                        {% if servicio.categoria %}
+                            <div class="small muted">{{ servicio.categoria }}</div>
+                        {% endif %}
+                    </td>
+                    <td>{{ servicio.negocio }}</td>
+                    <td>{{ servicio.duracion_minutos }} min</td>
+                    <td class="servicio-precio">${{ servicio.precio }}</td>
+                    <td>
+                        <span class="badge badge-{{ servicio.estado }}">{{ servicio.get_estado_display }}</span>
+                    </td>
+                    <td>
+                        <div class="actions">
+                            <a href="{% url 'servicios:detalle' servicio.pk %}">Ver</a>
+                            <a href="{% url 'servicios:editar' servicio.pk %}">Editar</a>
+                        </div>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td class="empty" colspan="6">No hay servicios.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if is_paginated %}
+    <nav class="pagination" aria-label="Paginacion">
+        {% if page_obj.has_previous %}
+            <a class="button button-secondary" href="?q={{ query|urlencode }}&estado={{ estado_actual }}&negocio={{ negocio_actual }}&page={{ page_obj.previous_page_number }}">Anterior</a>
+        {% endif %}
+        <span class="muted">Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a class="button button-secondary" href="?q={{ query|urlencode }}&estado={{ estado_actual }}&negocio={{ negocio_actual }}&page={{ page_obj.next_page_number }}">Siguiente</a>
+        {% endif %}
+    </nav>
+{% endif %}
+{% endblock %}

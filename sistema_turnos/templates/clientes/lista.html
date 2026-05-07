@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Clientes | Sistema de turnos{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/clientes.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/clientes.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Clientes</p>
+        <h1>Clientes</h1>
+    </div>
+    <a class="button" href="{% url 'clientes:crear' %}">Nuevo cliente</a>
+</section>
+
+<form class="toolbar toolbar-clientes" method="get">
+    <input class="input" type="search" name="q" value="{{ query }}" placeholder="Buscar clientes">
+    <select class="input" name="estado">
+        <option value="">Todos los estados</option>
+        {% for value, label in estados %}
+            <option value="{{ value }}" {% if value == estado_actual %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Buscar</button>
+    {% if query or estado_actual %}
+        <a class="button button-secondary" href="{% url 'clientes:lista' %}">Limpiar</a>
+    {% endif %}
+</form>
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Cliente</th>
+                <th>Negocio</th>
+                <th>Contacto</th>
+                <th>Documento</th>
+                <th>Estado</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cliente in clientes %}
+                <tr>
+                    <td>
+                        <a href="{% url 'clientes:detalle' cliente.pk %}">{{ cliente.nombre_visible }}</a>
+                        {% if cliente.apellido %}
+                            <div class="small muted">{{ cliente.nombre }} {{ cliente.apellido }}</div>
+                        {% endif %}
+                    </td>
+                    <td>{{ cliente.negocio }}</td>
+                    <td>
+                        {% if cliente.telefono %}<div>{{ cliente.telefono }}</div>{% endif %}
+                        {% if cliente.whatsapp %}<div>{{ cliente.whatsapp }}</div>{% endif %}
+                        {% if cliente.email %}<div class="small muted">{{ cliente.email }}</div>{% endif %}
+                        {% if not cliente.telefono and not cliente.whatsapp and not cliente.email %}
+                            <span class="muted">Sin contacto</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if cliente.numero_documento %}
+                            {{ cliente.get_tipo_documento_display }} {{ cliente.numero_documento }}
+                        {% else %}
+                            <span class="muted">Sin documento</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge badge-{{ cliente.estado }}">{{ cliente.get_estado_display }}</span>
+                    </td>
+                    <td>
+                        <div class="actions">
+                            <a href="{% url 'clientes:detalle' cliente.pk %}">Ver</a>
+                            <a href="{% url 'clientes:editar' cliente.pk %}">Editar</a>
+                        </div>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td class="empty" colspan="6">No hay clientes.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if is_paginated %}
+    <nav class="pagination" aria-label="Paginacion">
+        {% if page_obj.has_previous %}
+            <a class="button button-secondary" href="?q={{ query|urlencode }}&estado={{ estado_actual }}&page={{ page_obj.previous_page_number }}">Anterior</a>
+        {% endif %}
+        <span class="muted">Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a class="button button-secondary" href="?q={{ query|urlencode }}&estado={{ estado_actual }}&page={{ page_obj.next_page_number }}">Siguiente</a>
+        {% endif %}
+    </nav>
+{% endif %}
+{% endblock %}

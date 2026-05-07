@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ titulo }} | Clientes{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/clientes.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/clientes.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Clientes</p>
+        <h1>{{ titulo }}</h1>
+    </div>
+    <a class="button button-secondary" href="{% if cliente %}{% url 'clientes:detalle' cliente.pk %}{% else %}{% url 'clientes:lista' %}{% endif %}">Cancelar</a>
+</section>
+
+<form class="panel" method="post" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+        {{ form.non_field_errors }}
+    {% endif %}
+
+    <div class="form-grid">
+        {% for field in form %}
+            <div class="field {% if field.name == 'notas' %}span-2{% endif %}">
+                {% if field.field.widget.input_type == "checkbox" %}
+                    <label class="checkbox-label" for="{{ field.id_for_label }}">
+                        {{ field }}
+                        <span>{{ field.label }}</span>
+                    </label>
+                {% else %}
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                {% endif %}
+
+                {% if field.errors %}
+                    {{ field.errors }}
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="form-actions">
+        <button type="submit">Guardar</button>
+        <a class="button button-secondary" href="{% if cliente %}{% url 'clientes:detalle' cliente.pk %}{% else %}{% url 'clientes:lista' %}{% endif %}">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

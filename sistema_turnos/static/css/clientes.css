@@ -1,0 +1,9 @@
+.toolbar-clientes {
+    grid-template-columns: 1fr 180px auto auto;
+}
+
+@media (max-width: 760px) {
+    .toolbar-clientes {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,40 @@
+<!doctype html>
+{% load static %}
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Sistema de turnos{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    {% block extra_css %}{% endblock %}
+    <script src="{% static 'js/base.js' %}" defer></script>
+    {% block extra_js %}{% endblock %}
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-inner">
+            <a class="brand" href="{% url 'negocios:lista' %}">Sistema de turnos</a>
+            <nav class="nav" aria-label="Principal">
+                <a href="{% url 'negocios:lista' %}">Negocios</a>
+                <a href="{% url 'sucursales:lista' %}">Sucursales</a>
+                <a href="{% url 'clientes:lista' %}">Clientes</a>
+                <a href="{% url 'servicios:lista' %}">Servicios</a>
+                <a href="{% url 'profesionales:lista' %}">Profesionales</a>
+                <a href="/admin/">Admin</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

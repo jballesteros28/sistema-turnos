@@ -1,0 +1,13 @@
+.toolbar-servicios {
+    grid-template-columns: 1fr 160px 220px auto auto;
+}
+
+.servicio-precio {
+    font-weight: 700;
+}
+
+@media (max-width: 760px) {
+    .toolbar-servicios {
+        grid-template-columns: 1fr;
+    }
+}

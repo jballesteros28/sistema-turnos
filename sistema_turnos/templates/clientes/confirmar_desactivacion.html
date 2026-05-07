@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Desactivar cliente | Clientes{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/clientes.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/clientes.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Clientes</p>
+        <h1>Desactivar cliente</h1>
+    </div>
+    <a class="button button-secondary" href="{% url 'clientes:detalle' cliente.pk %}">Volver</a>
+</section>
+
+<section class="panel">
+    <h2>{{ cliente.nombre_visible }}</h2>
+    <p class="muted">El cliente quedara inactivo y se conservara su historial.</p>
+
+    <form method="post" class="form-actions">
+        {% csrf_token %}
+        <button class="button-danger" type="submit">Desactivar</button>
+        <a class="button button-secondary" href="{% url 'clientes:detalle' cliente.pk %}">Cancelar</a>
+    </form>
+</section>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Desactivar servicio | Servicios{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/servicios.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/servicios.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Servicios</p>
+        <h1>Desactivar servicio</h1>
+    </div>
+    <a class="button button-secondary" href="{% url 'servicios:detalle' servicio.pk %}">Volver</a>
+</section>
+
+<section class="panel">
+    <h2>{{ servicio.nombre }}</h2>
+    <p class="muted">El servicio quedara inactivo y se conservara su historial.</p>
+
+    <form method="post" class="form-actions">
+        {% csrf_token %}
+        <button class="button-danger" type="submit">Desactivar</button>
+        <a class="button button-secondary" href="{% url 'servicios:detalle' servicio.pk %}">Cancelar</a>
+    </form>
+</section>
+{% endblock %}

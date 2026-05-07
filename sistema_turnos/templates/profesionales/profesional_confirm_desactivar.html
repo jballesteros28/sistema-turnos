@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Desactivar profesional | Profesionales{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/profesionales.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/profesionales.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Profesionales</p>
+        <h1>Desactivar profesional</h1>
+    </div>
+    <a class="button button-secondary" href="{% url 'profesionales:detalle' profesional.pk %}">Volver</a>
+</section>
+
+<section class="panel">
+    <h2>{{ profesional.nombre_visible }}</h2>
+    <p class="muted">El profesional quedara inactivo, dejara de aceptar turnos y se conservara su historial.</p>
+
+    <form method="post" class="form-actions">
+        {% csrf_token %}
+        <button class="button-danger" type="submit">Desactivar</button>
+        <a class="button button-secondary" href="{% url 'profesionales:detalle' profesional.pk %}">Cancelar</a>
+    </form>
+</section>
+{% endblock %}

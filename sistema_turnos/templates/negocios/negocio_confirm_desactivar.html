@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Desactivar negocio | Negocios{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/negocios.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/negocios.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Negocios</p>
+        <h1>Desactivar negocio</h1>
+    </div>
+    <a class="button button-secondary" href="{% url 'negocios:detalle' negocio.pk %}">Volver</a>
+</section>
+
+<section class="panel">
+    <h2>{{ negocio.nombre_visible }}</h2>
+    <p class="muted">El negocio quedara inactivo y se conservara su historial.</p>
+
+    <form method="post" class="form-actions">
+        {% csrf_token %}
+        <button class="button-danger" type="submit">Desactivar</button>
+        <a class="button button-secondary" href="{% url 'negocios:detalle' negocio.pk %}">Cancelar</a>
+    </form>
+</section>
+{% endblock %}

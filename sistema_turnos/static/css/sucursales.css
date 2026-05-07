@@ -1,0 +1,14 @@
+.toolbar-sucursales {
+    grid-template-columns: 1fr 180px 220px auto auto;
+}
+
+.sucursal-ubicacion {
+    display: grid;
+    gap: 2px;
+}
+
+@media (max-width: 760px) {
+    .toolbar-sucursales {
+        grid-template-columns: 1fr;
+    }
+}

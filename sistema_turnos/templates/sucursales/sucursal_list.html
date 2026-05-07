@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Sucursales | Sistema de turnos{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/sucursales.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/sucursales.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Sucursales</p>
+        <h1>Sucursales</h1>
+    </div>
+    <a class="button" href="{% url 'sucursales:crear' %}">Nueva sucursal</a>
+</section>
+
+<form class="toolbar toolbar-sucursales" method="get">
+    <input class="input" type="search" name="q" value="{{ query }}" placeholder="Buscar sucursales">
+    <select class="input" name="estado">
+        <option value="">Todos los estados</option>
+        {% for value, label in estados %}
+            <option value="{{ value }}" {% if value == estado_actual %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <select class="input" name="negocio">
+        <option value="">Todos los negocios</option>
+        {% for negocio in negocios %}
+            <option value="{{ negocio.pk }}" {% if negocio.pk|stringformat:"s" == negocio_actual %}selected{% endif %}>{{ negocio.nombre }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Buscar</button>
+    {% if query or estado_actual or negocio_actual %}
+        <a class="button button-secondary" href="{% url 'sucursales:lista' %}">Limpiar</a>
+    {% endif %}
+</form>
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Sucursal</th>
+                <th>Negocio</th>
+                <th>Ubicacion</th>
+                <th>Contacto</th>
+                <th>Estado</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sucursal in sucursales %}
+                <tr>
+                    <td>
+                        <a href="{% url 'sucursales:detalle' sucursal.pk %}">{{ sucursal.nombre }}</a>
+                        {% if sucursal.es_principal %}
+                            <div class="small muted">Principal</div>
+                        {% endif %}
+                    </td>
+                    <td>{{ sucursal.negocio }}</td>
+                    <td>
+                        <div class="sucursal-ubicacion">
+                            <span>{{ sucursal.ciudad }}, {{ sucursal.pais }}</span>
+                            <span class="small muted">{{ sucursal.direccion }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        {% if sucursal.telefono %}<div>{{ sucursal.telefono }}</div>{% endif %}
+                        {% if sucursal.email %}<div class="small muted">{{ sucursal.email }}</div>{% endif %}
+                        {% if not sucursal.telefono and not sucursal.email %}
+                            <span class="muted">Sin contacto</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge badge-{{ sucursal.estado }}">{{ sucursal.get_estado_display }}</span>
+                    </td>
+                    <td>
+                        <div class="actions">
+                            <a href="{% url 'sucursales:detalle' sucursal.pk %}">Ver</a>
+                            <a href="{% url 'sucursales:editar' sucursal.pk %}">Editar</a>
+                        </div>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td class="empty" colspan="6">No hay sucursales.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if is_paginated %}
+    <nav class="pagination" aria-label="Paginacion">
+        {% if page_obj.has_previous %}
+            <a class="button button-secondary" href="?q={{ query|urlencode }}&estado={{ estado_actual }}&negocio={{ negocio_actual }}&page={{ page_obj.previous_page_number }}">Anterior</a>
+        {% endif %}
+        <span class="muted">Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a class="button button-secondary" href="?q={{ query|urlencode }}&estado={{ estado_actual }}&negocio={{ negocio_actual }}&page={{ page_obj.next_page_number }}">Siguiente</a>
+        {% endif %}
+    </nav>
+{% endif %}
+{% endblock %}

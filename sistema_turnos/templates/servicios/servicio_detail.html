@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ servicio.nombre }} | Servicios{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/servicios.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/servicios.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">{{ servicio.negocio }}</p>
+        <h1>{{ servicio.nombre }}</h1>
+        <div class="meta">
+            <span class="badge badge-{{ servicio.estado }}">{{ servicio.get_estado_display }}</span>
+        </div>
+    </div>
+    <div class="actions">
+        <a class="button button-secondary" href="{% url 'servicios:lista' %}">Volver</a>
+        <a class="button" href="{% url 'servicios:editar' servicio.pk %}">Editar</a>
+        {% if servicio.estado == "activo" %}
+            <a class="button button-danger" href="{% url 'servicios:desactivar' servicio.pk %}">Desactivar</a>
+        {% elif servicio.estado == "inactivo" %}
+            <form method="post" action="{% url 'servicios:activar' servicio.pk %}">
+                {% csrf_token %}
+                <button type="submit">Activar</button>
+            </form>
+        {% endif %}
+    </div>
+</section>
+
+<section class="panel">
+    <h2>Datos del servicio</h2>
+    <dl class="detail-grid">
+        <div class="detail-item">
+            <dt>Categoria</dt>
+            <dd>{{ servicio.categoria|default:"-" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Duracion</dt>
+            <dd>{{ servicio.duracion_minutos }} minutos</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Precio</dt>
+            <dd>${{ servicio.precio }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Reserva online</dt>
+            <dd>{% if servicio.visible_en_reserva_online %}Visible{% else %}Oculto{% endif %}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Orden</dt>
+            <dd>{{ servicio.orden_visualizacion }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Slug</dt>
+            <dd>{{ servicio.slug }}</dd>
+        </div>
+        <div class="detail-item span-2">
+            <dt>Descripcion</dt>
+            <dd>{{ servicio.descripcion|linebreaksbr|default:"-" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Creado</dt>
+            <dd>{{ servicio.creado_en|date:"d/m/Y H:i" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Actualizado</dt>
+            <dd>{{ servicio.actualizado_en|date:"d/m/Y H:i" }}</dd>
+        </div>
+    </dl>
+</section>
+{% endblock %}

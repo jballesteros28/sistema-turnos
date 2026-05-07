@@ -13,7 +13,14 @@ class ProfesionalAdmin(admin.ModelAdmin):
         "acepta_turnos",
         "visible_en_reserva_online",
     )
-    list_filter = ("estado", "tipo_profesional", "acepta_turnos", "visible_en_reserva_online")
+    list_filter = (
+        "estado",
+        "tipo_profesional",
+        "acepta_turnos",
+        "visible_en_reserva_online",
+        "negocio",
+    )
     search_fields = ("nombre", "apellido", "nombre_visible", "slug", "negocio__nombre")
+    ordering = ("negocio", "orden_visualizacion", "apellido", "nombre")
     prepopulated_fields = {"slug": ("nombre_visible",)}
     filter_horizontal = ("sucursales", "servicios")

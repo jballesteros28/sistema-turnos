@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ titulo }} | Negocios{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/negocios.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/negocios.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Negocios</p>
+        <h1>{{ titulo }}</h1>
+    </div>
+    <a class="button button-secondary" href="{% if negocio %}{% url 'negocios:detalle' negocio.pk %}{% else %}{% url 'negocios:lista' %}{% endif %}">Cancelar</a>
+</section>
+
+<form class="panel" method="post" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+        {{ form.non_field_errors }}
+    {% endif %}
+
+    <div class="form-grid">
+        {% for field in form %}
+            <div class="field {% if field.name == 'descripcion' or field.name == 'direccion_principal' %}span-2{% endif %}">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+
+                {% if field.help_text %}
+                    <span class="help small">{{ field.help_text }}</span>
+                {% endif %}
+
+                {% if field.errors %}
+                    {{ field.errors }}
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="form-actions">
+        <button type="submit">Guardar</button>
+        <a class="button button-secondary" href="{% if negocio %}{% url 'negocios:detalle' negocio.pk %}{% else %}{% url 'negocios:lista' %}{% endif %}">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Desactivar sucursal | Sucursales{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/sucursales.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/sucursales.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Sucursales</p>
+        <h1>Desactivar sucursal</h1>
+    </div>
+    <a class="button button-secondary" href="{% url 'sucursales:detalle' sucursal.pk %}">Volver</a>
+</section>
+
+<section class="panel">
+    <h2>{{ sucursal.nombre }}</h2>
+    <p class="muted">La sucursal quedara inactiva, dejara de aceptar turnos y se conservara su historial.</p>
+
+    <form method="post" class="form-actions">
+        {% csrf_token %}
+        <button class="button-danger" type="submit">Desactivar</button>
+        <a class="button button-secondary" href="{% url 'sucursales:detalle' sucursal.pk %}">Cancelar</a>
+    </form>
+</section>
+{% endblock %}

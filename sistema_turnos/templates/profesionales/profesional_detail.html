@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ profesional.nombre_visible }} | Profesionales{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/profesionales.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/profesionales.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">{{ profesional.negocio }}</p>
+        <h1>{{ profesional.nombre_visible }}</h1>
+        <div class="meta">
+            <span class="badge badge-{{ profesional.estado }}">{{ profesional.get_estado_display }}</span>
+        </div>
+    </div>
+    <div class="actions">
+        <a class="button button-secondary" href="{% url 'profesionales:lista' %}">Volver</a>
+        <a class="button" href="{% url 'profesionales:editar' profesional.pk %}">Editar</a>
+        {% if profesional.estado == "activo" %}
+            <a class="button button-danger" href="{% url 'profesionales:desactivar' profesional.pk %}">Desactivar</a>
+        {% elif profesional.estado == "inactivo" %}
+            <form method="post" action="{% url 'profesionales:activar' profesional.pk %}">
+                {% csrf_token %}
+                <button type="submit">Activar</button>
+            </form>
+        {% endif %}
+    </div>
+</section>
+
+<section class="panel">
+    <h2>Datos del profesional</h2>
+    <dl class="detail-grid">
+        <div class="detail-item">
+            <dt>Nombre</dt>
+            <dd>{{ profesional.nombre }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Apellido</dt>
+            <dd>{{ profesional.apellido|default:"-" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Tipo</dt>
+            <dd>{{ profesional.get_tipo_profesional_display }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Especialidad</dt>
+            <dd>{{ profesional.especialidad|default:"-" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Matricula</dt>
+            <dd>{{ profesional.matricula|default:"-" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Acepta turnos</dt>
+            <dd>{% if profesional.acepta_turnos %}Si{% else %}No{% endif %}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Email</dt>
+            <dd>{{ profesional.email|default:"-" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Telefono</dt>
+            <dd>{{ profesional.telefono|default:"-" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>WhatsApp</dt>
+            <dd>{{ profesional.whatsapp|default:"-" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Buffer</dt>
+            <dd>{{ profesional.duracion_buffer_minutos }} minutos</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Reserva online</dt>
+            <dd>{% if profesional.visible_en_reserva_online %}Visible{% else %}Oculto{% endif %}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Orden</dt>
+            <dd>{{ profesional.orden_visualizacion }}</dd>
+        </div>
+        <div class="detail-item span-2">
+            <dt>Sucursales</dt>
+            <dd>
+                <div class="tag-list">
+                    {% for sucursal in profesional.sucursales.all %}
+                        <span class="tag">{{ sucursal.nombre }}</span>
+                    {% empty %}
+                        <span class="muted">Sin sucursales asociadas</span>
+                    {% endfor %}
+                </div>
+            </dd>
+        </div>
+        <div class="detail-item span-2">
+            <dt>Servicios</dt>
+            <dd>
+                <div class="tag-list">
+                    {% for servicio in profesional.servicios.all %}
+                        <span class="tag">{{ servicio.nombre }}</span>
+                    {% empty %}
+                        <span class="muted">Sin servicios asociados</span>
+                    {% endfor %}
+                </div>
+            </dd>
+        </div>
+        <div class="detail-item span-2">
+            <dt>Descripcion</dt>
+            <dd>{{ profesional.descripcion_profesional|linebreaksbr|default:"-" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Creado</dt>
+            <dd>{{ profesional.creado_en|date:"d/m/Y H:i" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Actualizado</dt>
+            <dd>{{ profesional.actualizado_en|date:"d/m/Y H:i" }}</dd>
+        </div>
+    </dl>
+</section>
+{% endblock %}

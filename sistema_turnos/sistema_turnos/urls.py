@@ -16,17 +16,23 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import RedirectView
 
 urlpatterns = [
+    path('', RedirectView.as_view(pattern_name='negocios:lista', permanent=False)),
     path('admin/', admin.site.urls),
-    path('clientes', include('clientes.urls')),
-    path('configuracion-negocio', include('configuracion_negocio.urls')),
-    path('disponibilidad', include('disponibilidad.urls')),
-    path('excepcion', include('excepcion.urls')),
-    path('negocio', include('negocio.urls')),
-    path('profesional', include('profesional.urls')),
-    path('servicio', include('servicio.urls')),
-    path('sucursal', include('sucursal.urls')),
-    path('turnos', include('turnos.urls')),
-    path('usuarios', include('usuarios.urls')),
+    path('clientes/', include('clientes.urls')),
+    path('configuracion-negocio/', include('configuracion_negocio.urls')),
+    path('disponibilidad/', include('disponibilidad.urls')),
+    path('excepcion/', include('excepcion.urls')),
+    path('negocios/', include('negocio.urls')),
+    path('negocio/', RedirectView.as_view(pattern_name='negocios:lista', permanent=False)),
+    path('profesionales/', include('profesional.urls')),
+    path('profesional/', RedirectView.as_view(pattern_name='profesionales:lista', permanent=False)),
+    path('servicios/', include('servicio.urls')),
+    path('servicio/', RedirectView.as_view(pattern_name='servicios:lista', permanent=False)),
+    path('sucursales/', include('sucursal.urls')),
+    path('sucursal/', RedirectView.as_view(pattern_name='sucursales:lista', permanent=False)),
+    path('turnos/', include('turnos.urls')),
+    path('usuarios/', include('usuarios.urls')),
 ]

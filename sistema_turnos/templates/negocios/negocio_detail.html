@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ negocio.nombre_visible }} | Negocios{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/negocios.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/negocios.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">{{ negocio.get_tipo_negocio_display }}</p>
+        <h1>{{ negocio.nombre_visible }}</h1>
+        <div class="meta">
+            <span class="badge badge-{{ negocio.estado }}">{{ negocio.get_estado_display }}</span>
+        </div>
+    </div>
+    <div class="actions">
+        <a class="button button-secondary" href="{% url 'negocios:lista' %}">Volver</a>
+        <a class="button" href="{% url 'negocios:editar' negocio.pk %}">Editar</a>
+        {% if negocio.estado == "activo" %}
+            <a class="button button-danger" href="{% url 'negocios:desactivar' negocio.pk %}">Desactivar</a>
+        {% else %}
+            <form method="post" action="{% url 'negocios:activar' negocio.pk %}">
+                {% csrf_token %}
+                <button type="submit">Activar</button>
+            </form>
+        {% endif %}
+    </div>
+</section>
+
+<section class="panel">
+    <h2>Datos del negocio</h2>
+    <dl class="detail-grid">
+        <div class="detail-item">
+            <dt>Nombre legal</dt>
+            <dd>{{ negocio.nombre }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Email</dt>
+            <dd>{{ negocio.email_principal }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Telefono</dt>
+            <dd>{{ negocio.telefono_principal }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>WhatsApp</dt>
+            <dd>{{ negocio.whatsapp_principal|default:"-" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Sitio web</dt>
+            <dd>{{ negocio.sitio_web|default:"-" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Instagram</dt>
+            <dd>{{ negocio.instagram|default:"-" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Ciudad</dt>
+            <dd>{{ negocio.ciudad }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Pais</dt>
+            <dd>{{ negocio.pais }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Zona horaria</dt>
+            <dd>{{ negocio.zona_horaria }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Moneda</dt>
+            <dd>{{ negocio.moneda }}</dd>
+        </div>
+        <div class="detail-item span-2">
+            <dt>Direccion</dt>
+            <dd>{{ negocio.direccion_principal|default:"-" }}</dd>
+        </div>
+        <div class="detail-item span-2">
+            <dt>Descripcion</dt>
+            <dd>{{ negocio.descripcion|linebreaksbr|default:"-" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Alta</dt>
+            <dd>{{ negocio.fecha_alta|date:"d/m/Y H:i" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Baja</dt>
+            <dd>{{ negocio.fecha_baja|date:"d/m/Y H:i"|default:"-" }}</dd>
+        </div>
+    </dl>
+</section>
+{% endblock %}

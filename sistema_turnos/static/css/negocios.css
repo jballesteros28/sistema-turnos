@@ -1,0 +1,14 @@
+.toolbar-negocios {
+    grid-template-columns: 1fr 180px 220px auto auto;
+}
+
+.negocio-contacto {
+    display: grid;
+    gap: 2px;
+}
+
+@media (max-width: 760px) {
+    .toolbar-negocios {
+        grid-template-columns: 1fr;
+    }
+}

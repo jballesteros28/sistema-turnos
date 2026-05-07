@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ sucursal.nombre }} | Sucursales{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/sucursales.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/sucursales.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">{{ sucursal.negocio }}</p>
+        <h1>{{ sucursal.nombre }}</h1>
+        <div class="meta">
+            <span class="badge badge-{{ sucursal.estado }}">{{ sucursal.get_estado_display }}</span>
+        </div>
+    </div>
+    <div class="actions">
+        <a class="button button-secondary" href="{% url 'sucursales:lista' %}">Volver</a>
+        <a class="button" href="{% url 'sucursales:editar' sucursal.pk %}">Editar</a>
+        {% if sucursal.estado == "activa" %}
+            <a class="button button-danger" href="{% url 'sucursales:desactivar' sucursal.pk %}">Desactivar</a>
+        {% else %}
+            <form method="post" action="{% url 'sucursales:activar' sucursal.pk %}">
+                {% csrf_token %}
+                <button type="submit">Activar</button>
+            </form>
+        {% endif %}
+    </div>
+</section>
+
+<section class="panel">
+    <h2>Datos de la sucursal</h2>
+    <dl class="detail-grid">
+        <div class="detail-item">
+            <dt>Direccion</dt>
+            <dd>{{ sucursal.direccion }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Ciudad</dt>
+            <dd>{{ sucursal.ciudad }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Provincia o estado</dt>
+            <dd>{{ sucursal.provincia_estado|default:"-" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Pais</dt>
+            <dd>{{ sucursal.pais }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Email</dt>
+            <dd>{{ sucursal.email|default:"-" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Telefono</dt>
+            <dd>{{ sucursal.telefono|default:"-" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>WhatsApp</dt>
+            <dd>{{ sucursal.whatsapp|default:"-" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Zona horaria</dt>
+            <dd>{{ sucursal.zona_horaria }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Principal</dt>
+            <dd>{% if sucursal.es_principal %}Si{% else %}No{% endif %}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Acepta turnos</dt>
+            <dd>{% if sucursal.acepta_turnos %}Si{% else %}No{% endif %}</dd>
+        </div>
+        <div class="detail-item span-2">
+            <dt>Referencia</dt>
+            <dd>{{ sucursal.referencia_direccion|default:"-" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Apertura</dt>
+            <dd>{{ sucursal.fecha_apertura|date:"d/m/Y H:i" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Cierre</dt>
+            <dd>{{ sucursal.fecha_cierre|date:"d/m/Y H:i"|default:"-" }}</dd>
+        </div>
+    </dl>
+</section>
+{% endblock %}
