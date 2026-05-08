@@ -29,6 +29,15 @@
 </section>
 
 <section class="panel">
+    <h2>Accesos rapidos</h2>
+    <div class="quick-actions">
+        <a class="button" href="{% url 'disponibilidades:crear' %}?negocio={{ profesional.negocio_id }}&profesional={{ profesional.pk }}">Crear disponibilidad</a>
+        <a class="button button-secondary" href="{% url 'excepciones:crear' %}?negocio={{ profesional.negocio_id }}&profesional={{ profesional.pk }}">Crear excepcion</a>
+        <a class="button button-secondary" href="{% url 'turnos:crear' %}?negocio={{ profesional.negocio_id }}&profesional={{ profesional.pk }}">Crear turno</a>
+    </div>
+</section>
+
+<section class="panel">
     <h2>Datos del profesional</h2>
     <dl class="detail-grid">
         <div class="detail-item">

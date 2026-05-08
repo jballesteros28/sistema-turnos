@@ -1,5 +1,5 @@
 .toolbar-profesionales {
-    grid-template-columns: 1fr 150px 200px 200px auto auto;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
 .profesional-resumen {
@@ -7,13 +7,7 @@
     gap: 4px;
 }
 
-@media (max-width: 900px) {
-    .toolbar-profesionales {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-@media (max-width: 760px) {
+@media (max-width: 768px) {
     .toolbar-profesionales {
         grid-template-columns: 1fr;
     }

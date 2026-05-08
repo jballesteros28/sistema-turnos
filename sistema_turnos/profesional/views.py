@@ -6,20 +6,36 @@ from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
 from negocio.models import Negocio
+from servicio.models import Servicio
+from sistema_turnos.view_utils import get_query_id, get_query_initial
 from sucursal.models import Sucursal
+from usuarios.mixins import (
+    GestionNegocioFormRequiredMixin,
+    GestionNegocioObjectRequiredMixin,
+    LoginRequiredUserFormMixin,
+)
+from usuarios.permissions import (
+    filtrar_por_negocios_permitidos,
+    get_negocios_permitidos,
+    get_profesionales_permitidos_para_turnos,
+)
 
 from .forms import ProfesionalForm
 from .models import EstadoProfesional, Profesional
 
 
-class ProfesionalQuerySetMixin:
+class ProfesionalQuerySetMixin(LoginRequiredUserFormMixin):
     model = Profesional
 
     def get_queryset(self):
-        return Profesional.objects.select_related("negocio").prefetch_related(
+        queryset = Profesional.objects.select_related("negocio").prefetch_related(
             "sucursales",
             "servicios",
         )
+        ids_permitidos = get_profesionales_permitidos_para_turnos(
+            self.request.user,
+        ).values("id")
+        return queryset.filter(id__in=ids_permitidos)
 
 
 class ProfesionalListView(ProfesionalQuerySetMixin, ListView):
@@ -67,8 +83,11 @@ class ProfesionalListView(ProfesionalQuerySetMixin, ListView):
         context["negocio_actual"] = self.negocio_id
         context["sucursal_actual"] = self.sucursal_id
         context["estados"] = EstadoProfesional.choices
-        context["negocios"] = Negocio.objects.order_by("nombre")
-        context["sucursales"] = Sucursal.objects.select_related("negocio").order_by(
+        context["negocios"] = get_negocios_permitidos(self.request.user).order_by("nombre")
+        context["sucursales"] = filtrar_por_negocios_permitidos(
+            Sucursal.objects.select_related("negocio"),
+            self.request.user,
+        ).order_by(
             "negocio__nombre",
             "nombre",
         )
@@ -80,14 +99,58 @@ class ProfesionalDetailView(ProfesionalQuerySetMixin, DetailView):
     context_object_name = "profesional"
 
 
-class ProfesionalCreateView(ProfesionalQuerySetMixin, CreateView):
+class ProfesionalCreateView(
+    GestionNegocioFormRequiredMixin,
+    ProfesionalQuerySetMixin,
+    CreateView,
+):
     form_class = ProfesionalForm
     template_name = "profesionales/profesional_form.html"
+
+    def get_initial(self):
+        initial = get_query_initial(self.request, "negocio")
+        sucursal_id = get_query_id(self.request, "sucursal")
+        servicio_id = get_query_id(self.request, "servicio")
+
+        if sucursal_id:
+            initial["sucursales"] = [sucursal_id]
+        if servicio_id:
+            initial["servicios"] = [servicio_id]
+
+        return initial
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["titulo"] = "Nuevo profesional"
+        context["avisos_base"] = self._get_avisos_base()
         return context
+
+    def _get_avisos_base(self):
+        avisos = []
+        negocio_id = get_query_id(self.request, "negocio")
+
+        negocios_permitidos = get_negocios_permitidos(self.request.user)
+        if not negocios_permitidos.exists():
+            return ["Primero debes crear un negocio para continuar."]
+
+        if negocio_id:
+            if not filtrar_por_negocios_permitidos(
+                Sucursal.objects.filter(negocio_id=negocio_id),
+                self.request.user,
+            ).exists():
+                avisos.append("Primero debes crear una sucursal para este negocio.")
+            if not filtrar_por_negocios_permitidos(
+                Servicio.objects.filter(negocio_id=negocio_id),
+                self.request.user,
+            ).exists():
+                avisos.append("Primero debes crear un servicio para este negocio.")
+        else:
+            if not filtrar_por_negocios_permitidos(Sucursal.objects, self.request.user).exists():
+                avisos.append("Primero debes crear una sucursal para continuar.")
+            if not filtrar_por_negocios_permitidos(Servicio.objects, self.request.user).exists():
+                avisos.append("Primero debes crear un servicio para continuar.")
+
+        return avisos
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -98,7 +161,11 @@ class ProfesionalCreateView(ProfesionalQuerySetMixin, CreateView):
         return reverse("profesionales:detalle", kwargs={"pk": self.object.pk})
 
 
-class ProfesionalUpdateView(ProfesionalQuerySetMixin, UpdateView):
+class ProfesionalUpdateView(
+    GestionNegocioObjectRequiredMixin,
+    ProfesionalQuerySetMixin,
+    UpdateView,
+):
     form_class = ProfesionalForm
     template_name = "profesionales/profesional_form.html"
     context_object_name = "profesional"
@@ -117,7 +184,11 @@ class ProfesionalUpdateView(ProfesionalQuerySetMixin, UpdateView):
         return reverse("profesionales:detalle", kwargs={"pk": self.object.pk})
 
 
-class ProfesionalDesactivarView(ProfesionalQuerySetMixin, View):
+class ProfesionalDesactivarView(
+    GestionNegocioObjectRequiredMixin,
+    ProfesionalQuerySetMixin,
+    View,
+):
     template_name = "profesionales/profesional_confirm_desactivar.html"
 
     def get_object(self):
@@ -135,7 +206,11 @@ class ProfesionalDesactivarView(ProfesionalQuerySetMixin, View):
         return redirect("profesionales:detalle", pk=profesional.pk)
 
 
-class ProfesionalActivarView(ProfesionalQuerySetMixin, View):
+class ProfesionalActivarView(
+    GestionNegocioObjectRequiredMixin,
+    ProfesionalQuerySetMixin,
+    View,
+):
     def post(self, request, *args, **kwargs):
         profesional = get_object_or_404(self.get_queryset(), pk=self.kwargs["pk"])
         profesional.estado = EstadoProfesional.ACTIVO

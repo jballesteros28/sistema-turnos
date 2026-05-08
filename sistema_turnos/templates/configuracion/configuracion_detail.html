@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Configuracion | {{ configuracion.negocio.nombre_visible }}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/configuracion.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/configuracion.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">{{ configuracion.negocio.nombre_visible }}</p>
+        <h1>Configuracion del negocio</h1>
+    </div>
+    <div class="actions">
+        <a class="button button-secondary" href="{% url 'configuracion_negocio:lista' %}">Volver</a>
+        <a class="button button-secondary" href="{% url 'negocios:detalle' configuracion.negocio.pk %}">Ver negocio</a>
+        <a class="button" href="{% url 'configuracion_negocio:editar' configuracion.pk %}">Editar</a>
+    </div>
+</section>
+
+<section class="panel">
+    <h2>Reglas de turnos</h2>
+    <dl class="detail-grid">
+        <div class="detail-item">
+            <dt>Politica de confirmacion</dt>
+            <dd>{{ configuracion.get_politica_confirmacion_display }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Turnos pasados</dt>
+            <dd>{% if configuracion.permite_turnos_pasados %}Permitidos{% else %}No permitidos{% endif %}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Anticipacion minima</dt>
+            <dd>{{ configuracion.anticipacion_minima_reserva_minutos }} minutos</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Anticipacion maxima</dt>
+            <dd>{{ configuracion.anticipacion_maxima_reserva_dias }} dias</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Buffer entre turnos</dt>
+            <dd>{{ configuracion.buffer_entre_turnos_minutos }} minutos</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Intervalo de turnos</dt>
+            <dd>{{ configuracion.intervalo_turnos_minutos }} minutos</dd>
+        </div>
+    </dl>
+</section>
+
+<section class="panel">
+    <h2>Cancelacion y recordatorios</h2>
+    <dl class="detail-grid">
+        <div class="detail-item">
+            <dt>Reserva online</dt>
+            <dd>{% if configuracion.permite_reserva_online %}Permitida{% else %}No permitida{% endif %}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Cancelacion</dt>
+            <dd>{% if configuracion.permite_cancelacion_online %}Permitida{% else %}No permitida{% endif %}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Tiempo minimo para cancelar</dt>
+            <dd>{{ configuracion.tiempo_minimo_cancelacion_minutos }} minutos</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Recordatorio</dt>
+            <dd>{{ configuracion.recordatorio_horas_antes }} horas antes</dd>
+        </div>
+    </dl>
+</section>
+{% endblock %}

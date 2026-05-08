@@ -64,6 +64,7 @@ class Cliente(models.Model):
         if not self.nombre_visible:
             self.nombre_visible = f"{self.nombre} {self.apellido}".strip()
         if not self.slug:
+            # TODO: antes de produccion, generar slugs unicos por negocio.
             self.slug = slugify(self.nombre_visible)
         super().save(*args, **kwargs)
 

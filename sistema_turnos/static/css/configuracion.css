@@ -1,0 +1,14 @@
+.toolbar-configuracion {
+    grid-template-columns: minmax(220px, 1.5fr) minmax(180px, 1fr) auto auto;
+}
+
+.configuracion-summary {
+    display: grid;
+    gap: 4px;
+}
+
+@media (max-width: 768px) {
+    .toolbar-configuracion {
+        grid-template-columns: 1fr;
+    }
+}

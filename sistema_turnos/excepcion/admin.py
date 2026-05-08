@@ -6,13 +6,31 @@ from .models import ExcepcionAgenda
 @admin.register(ExcepcionAgenda)
 class ExcepcionAgendaAdmin(admin.ModelAdmin):
     list_display = (
-        "titulo",
         "negocio",
+        "sucursal",
+        "profesional",
         "tipo",
+        "titulo",
         "fecha_hora_inicio",
         "fecha_hora_fin",
         "bloquea_turnos",
         "activo",
     )
-    list_filter = ("tipo", "bloquea_turnos", "activo", "negocio")
-    search_fields = ("titulo", "descripcion", "profesional__nombre", "sucursal__nombre")
+    list_filter = (
+        "tipo",
+        "bloquea_turnos",
+        "activo",
+        "negocio",
+        "sucursal",
+        "profesional",
+    )
+    search_fields = (
+        "titulo",
+        "descripcion",
+        "negocio__nombre",
+        "profesional__nombre",
+        "profesional__apellido",
+        "profesional__nombre_visible",
+        "sucursal__nombre",
+    )
+    ordering = ("negocio", "fecha_hora_inicio", "tipo")

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Desactivar excepcion | Excepciones{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/agenda.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/agenda.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Agenda</p>
+        <h1>Desactivar excepcion</h1>
+    </div>
+    <a class="button button-secondary" href="{% url 'excepciones:detalle' excepcion.pk %}">Volver</a>
+</section>
+
+<section class="panel">
+    <h2>{{ excepcion.titulo }}</h2>
+    <p class="muted">La excepcion quedara inactiva y dejara de bloquear turnos futuros.</p>
+
+    <form method="post" class="form-actions">
+        {% csrf_token %}
+        <button class="button-danger" type="submit">Desactivar</button>
+        <a class="button button-secondary" href="{% url 'excepciones:detalle' excepcion.pk %}">Cancelar</a>
+    </form>
+</section>
+{% endblock %}

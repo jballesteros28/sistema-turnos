@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Agenda diaria | Sistema de turnos{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/agenda.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/agenda.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header agenda-page-header">
+    <div>
+        <p class="eyebrow">Agenda</p>
+        <h1>Agenda diaria</h1>
+        <div class="meta">Fecha seleccionada: {{ fecha_seleccionada|date:"d/m/Y" }}</div>
+    </div>
+    <a class="button" href="{% url 'turnos:crear' %}">Nuevo turno</a>
+</section>
+
+{% if fecha_invalida %}
+    <div class="notice">Fecha invalida, se muestra el dia actual.</div>
+{% endif %}
+{% if not hay_negocios %}
+    <div class="notice">Primero debes crear un negocio.</div>
+{% endif %}
+{% if not hay_profesionales %}
+    <div class="notice">Primero debes crear un profesional.</div>
+{% endif %}
+
+<nav class="agenda-date-nav" aria-label="Navegacion de fecha">
+    <a class="button button-secondary" href="{{ dia_anterior_url }}">Dia anterior</a>
+    <a class="button button-secondary" href="{{ hoy_url }}">Hoy</a>
+    <a class="button button-secondary" href="{{ dia_siguiente_url }}">Dia siguiente</a>
+</nav>
+
+<form class="toolbar toolbar-agenda toolbar-agenda-turnos" method="get">
+    <input class="input" type="date" name="fecha" value="{{ fecha_actual }}">
+    <select class="input" name="negocio">
+        <option value="">Todos los negocios</option>
+        {% for negocio in negocios %}
+            <option value="{{ negocio.pk }}" {% if negocio.pk|stringformat:"s" == negocio_actual %}selected{% endif %}>{{ negocio.nombre }}</option>
+        {% endfor %}
+    </select>
+    <select class="input" name="sucursal">
+        <option value="">Todas las sucursales</option>
+        {% for sucursal in sucursales %}
+            <option value="{{ sucursal.pk }}" {% if sucursal.pk|stringformat:"s" == sucursal_actual %}selected{% endif %}>{{ sucursal.negocio.nombre }} - {{ sucursal.nombre }}</option>
+        {% endfor %}
+    </select>
+    <select class="input" name="profesional">
+        <option value="">Todos los profesionales</option>
+        {% for profesional in profesionales %}
+            <option value="{{ profesional.pk }}" {% if profesional.pk|stringformat:"s" == profesional_actual %}selected{% endif %}>{{ profesional.negocio.nombre }} - {{ profesional.nombre_visible }}</option>
+        {% endfor %}
+    </select>
+    <select class="input" name="estado">
+        <option value="">Todos los estados</option>
+        {% for value, label in estados %}
+            <option value="{{ value }}" {% if value == estado_actual %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Filtrar</button>
+    {% if fecha_actual or negocio_actual or sucursal_actual or profesional_actual or estado_actual %}
+        <a class="button button-secondary" href="{% url 'agenda:turnos' %}">Limpiar</a>
+    {% endif %}
+</form>
+
+<div class="table-wrap agenda-table-wrap">
+    <table class="agenda-turnos-table">
+        <thead>
+            <tr>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th>Cliente</th>
+                <th>Profesional</th>
+                <th>Servicio</th>
+                <th>Sucursal</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for turno in turnos %}
+                <tr>
+                    <td class="agenda-horario">{{ turno.fecha_hora_inicio|date:"H:i" }}</td>
+                    <td>{{ turno.fecha_hora_fin|date:"H:i" }}</td>
+                    <td>{{ turno.cliente.nombre_visible }}</td>
+                    <td>{{ turno.profesional.nombre_visible }}</td>
+                    <td>{{ turno.servicio.nombre }}</td>
+                    <td>{{ turno.sucursal.nombre }}</td>
+                    <td>
+                        <span class="badge badge-{{ turno.estado }}">{{ turno.get_estado_display }}</span>
+                    </td>
+                    <td>
+                        <div class="actions agenda-actions">
+                            <a href="{% url 'turnos:detalle' turno.pk %}">Ver</a>
+                            <a href="{% url 'turnos:editar' turno.pk %}">Editar</a>
+                            {% if turno.estado == "solicitado" %}
+                                <form method="post" action="{% url 'turnos:confirmar' turno.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit">Confirmar</button>
+                                </form>
+                            {% endif %}
+                            {% if turno.estado == "solicitado" or turno.estado == "confirmado" %}
+                                <form method="post" action="{% url 'turnos:completar' turno.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit">Completar</button>
+                                </form>
+                                <form method="post" action="{% url 'turnos:ausente' turno.pk %}">
+                                    {% csrf_token %}
+                                    <button class="button-secondary" type="submit">Ausente</button>
+                                </form>
+                                <a class="button button-danger" href="{% url 'turnos:cancelar' turno.pk %}">Cancelar</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td class="empty" colspan="8">No hay turnos para esta fecha.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

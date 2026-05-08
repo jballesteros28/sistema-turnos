@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Desactivar disponibilidad | Agenda{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/agenda.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/agenda.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Agenda</p>
+        <h1>Desactivar disponibilidad</h1>
+    </div>
+    <a class="button button-secondary" href="{% url 'disponibilidades:detalle' disponibilidad.pk %}">Volver</a>
+</section>
+
+<section class="panel">
+    <h2>{{ disponibilidad.profesional.nombre_visible }}</h2>
+    <p class="muted">
+        La franja {{ disponibilidad.get_dia_semana_display }} de
+        {{ disponibilidad.hora_inicio|time:"H:i" }} a {{ disponibilidad.hora_fin|time:"H:i" }}
+        quedara inactiva y se conservara su historial.
+    </p>
+
+    <form method="post" class="form-actions">
+        {% csrf_token %}
+        <button class="button-danger" type="submit">Desactivar</button>
+        <a class="button button-secondary" href="{% url 'disponibilidades:detalle' disponibilidad.pk %}">Cancelar</a>
+    </form>
+</section>
+{% endblock %}

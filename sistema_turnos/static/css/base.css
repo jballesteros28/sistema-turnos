@@ -58,6 +58,24 @@ a:hover {
     font-size: 18px;
 }
 
+.header-actions,
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.header-actions {
+    justify-content: flex-end;
+}
+
+.user-menu {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+}
+
 .nav {
     display: flex;
     align-items: center;
@@ -150,6 +168,21 @@ button:hover {
     background: #991b1b;
 }
 
+.link-button {
+    min-height: 0;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.link-button:hover {
+    background: transparent;
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
 .toolbar,
 .panel {
     background: var(--surface);
@@ -159,11 +192,27 @@ button:hover {
 
 .toolbar {
     display: grid;
-    grid-template-columns: 1fr 180px auto auto;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 10px;
-    align-items: center;
+    align-items: end;
     padding: 14px;
     margin-bottom: 16px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.toolbar > * {
+    min-width: 0;
+}
+
+.toolbar .search-field,
+.toolbar input[type="search"] {
+    min-width: 240px;
+}
+
+.toolbar .button,
+.toolbar button {
+    width: 100%;
 }
 
 .table-wrap {
@@ -264,6 +313,31 @@ tr:last-child td {
     padding: 18px;
 }
 
+.panel + .panel {
+    margin-top: 16px;
+}
+
+.quick-actions,
+.notice-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.notice-list {
+    margin-bottom: 16px;
+}
+
+.notice {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #fbbf24;
+    border-radius: var(--radius);
+    background: #fffbeb;
+    color: #92400e;
+    font-weight: 600;
+}
+
 .detail-grid,
 .form-grid {
     display: grid;
@@ -300,8 +374,15 @@ label {
     font-weight: 700;
 }
 
-.input {
+.input,
+select,
+input,
+textarea {
     width: 100%;
+    max-width: 100%;
+}
+
+.input {
     min-height: 38px;
     border: 1px solid var(--line);
     border-radius: var(--radius);
@@ -365,17 +446,40 @@ select[multiple].input {
     font-weight: 700;
 }
 
-@media (max-width: 760px) {
-    .header-inner,
+@media (max-width: 768px) {
     .page-header {
-        align-items: stretch;
         flex-direction: column;
+        align-items: stretch;
+    }
+
+    .page-header .button {
+        width: 100%;
+    }
+
+    .header-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 14px 0;
+    }
+
+    .nav {
+        width: 100%;
+    }
+
+    .header-actions {
+        width: 100%;
+        justify-content: flex-start;
     }
 
     .toolbar,
     .detail-grid,
     .form-grid {
         grid-template-columns: 1fr;
+    }
+
+    .toolbar .search-field,
+    .toolbar input[type="search"] {
+        min-width: 0;
     }
 
     .span-2 {

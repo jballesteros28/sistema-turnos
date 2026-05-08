@@ -29,6 +29,13 @@
 </section>
 
 <section class="panel">
+    <h2>Accesos rapidos</h2>
+    <div class="quick-actions">
+        <a class="button" href="{% url 'turnos:crear' %}?negocio={{ cliente.negocio_id }}&cliente={{ cliente.pk }}">Crear turno</a>
+    </div>
+</section>
+
+<section class="panel">
     <h2>Datos del cliente</h2>
     <dl class="detail-grid">
         <div class="detail-item">

@@ -2,6 +2,8 @@ from django import forms
 from django.utils import timezone
 from django.utils.text import slugify
 
+from usuarios.form_utils import limitar_querysets_por_usuario
+
 from .models import Cliente
 
 
@@ -44,8 +46,10 @@ class ClienteForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
         self.label_suffix = ""
+        limitar_querysets_por_usuario(self, self.user)
 
         for field in self.fields.values():
             if isinstance(field.widget, forms.CheckboxInput):

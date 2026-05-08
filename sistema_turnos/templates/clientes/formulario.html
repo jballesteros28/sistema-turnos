@@ -14,6 +14,14 @@
     <a class="button button-secondary" href="{% if cliente %}{% url 'clientes:detalle' cliente.pk %}{% else %}{% url 'clientes:lista' %}{% endif %}">Cancelar</a>
 </section>
 
+{% if avisos_base %}
+    <div class="notice-list">
+        {% for aviso in avisos_base %}
+            <div class="notice">{{ aviso }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+
 <form class="panel" method="post" novalidate>
     {% csrf_token %}
 

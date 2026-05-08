@@ -82,7 +82,12 @@ class Turno(models.Model):
             ),
             models.UniqueConstraint(
                 fields=["profesional", "fecha_hora_inicio"],
-                condition=~models.Q(estado=EstadoTurno.CANCELADO),
+                condition=models.Q(
+                    estado__in=[
+                        EstadoTurno.SOLICITADO,
+                        EstadoTurno.CONFIRMADO,
+                    ]
+                ),
                 name="uniq_turno_prof_inicio_act",
             ),
         ]

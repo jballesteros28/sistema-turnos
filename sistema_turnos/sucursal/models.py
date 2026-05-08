@@ -57,6 +57,7 @@ class Sucursal(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
+            # TODO: antes de produccion, generar slugs unicos por negocio.
             self.slug = slugify(self.nombre)
         if not self.zona_horaria and self.negocio_id:
             self.zona_horaria = self.negocio.zona_horaria

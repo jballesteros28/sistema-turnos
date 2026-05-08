@@ -5,15 +5,25 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
+from negocio.models import Negocio
+from sistema_turnos.view_utils import get_query_initial
+from usuarios.mixins import (
+    GestionOperacionFormRequiredMixin,
+    GestionOperacionObjectRequiredMixin,
+    LoginRequiredUserFormMixin,
+)
+from usuarios.permissions import filtrar_por_negocios_permitidos, get_negocios_permitidos
+
 from .forms import ClienteForm
 from .models import Cliente, EstadoCliente
 
 
-class ClienteQuerySetMixin:
+class ClienteQuerySetMixin(LoginRequiredUserFormMixin):
     model = Cliente
 
     def get_queryset(self):
-        return Cliente.objects.select_related("negocio")
+        queryset = Cliente.objects.select_related("negocio")
+        return filtrar_por_negocios_permitidos(queryset, self.request.user)
 
 
 class ClienteListView(ClienteQuerySetMixin, ListView):
@@ -57,13 +67,23 @@ class ClienteDetailView(ClienteQuerySetMixin, DetailView):
     context_object_name = "cliente"
 
 
-class ClienteCreateView(ClienteQuerySetMixin, CreateView):
+class ClienteCreateView(
+    GestionOperacionFormRequiredMixin,
+    ClienteQuerySetMixin,
+    CreateView,
+):
     form_class = ClienteForm
     template_name = "clientes/formulario.html"
+
+    def get_initial(self):
+        return get_query_initial(self.request, "negocio")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["titulo"] = "Nuevo cliente"
+        context["avisos_base"] = []
+        if not get_negocios_permitidos(self.request.user).exists():
+            context["avisos_base"].append("Primero debes crear un negocio para continuar.")
         return context
 
     def form_valid(self, form):
@@ -75,7 +95,11 @@ class ClienteCreateView(ClienteQuerySetMixin, CreateView):
         return reverse("clientes:detalle", kwargs={"pk": self.object.pk})
 
 
-class ClienteUpdateView(ClienteQuerySetMixin, UpdateView):
+class ClienteUpdateView(
+    GestionOperacionObjectRequiredMixin,
+    ClienteQuerySetMixin,
+    UpdateView,
+):
     form_class = ClienteForm
     template_name = "clientes/formulario.html"
     context_object_name = "cliente"
@@ -94,7 +118,11 @@ class ClienteUpdateView(ClienteQuerySetMixin, UpdateView):
         return reverse("clientes:detalle", kwargs={"pk": self.object.pk})
 
 
-class ClienteDesactivarView(ClienteQuerySetMixin, View):
+class ClienteDesactivarView(
+    GestionOperacionObjectRequiredMixin,
+    ClienteQuerySetMixin,
+    View,
+):
     template_name = "clientes/confirmar_desactivacion.html"
 
     def get_object(self):
@@ -111,7 +139,11 @@ class ClienteDesactivarView(ClienteQuerySetMixin, View):
         return redirect("clientes:detalle", pk=cliente.pk)
 
 
-class ClienteActivarView(ClienteQuerySetMixin, View):
+class ClienteActivarView(
+    GestionOperacionObjectRequiredMixin,
+    ClienteQuerySetMixin,
+    View,
+):
     def post(self, request, *args, **kwargs):
         cliente = get_object_or_404(self.get_queryset(), pk=self.kwargs["pk"])
         cliente.estado = EstadoCliente.ACTIVO

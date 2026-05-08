@@ -29,6 +29,25 @@
 </section>
 
 <section class="panel">
+    <h2>Accesos rapidos</h2>
+    <div class="quick-actions">
+        <a class="button" href="{% url 'sucursales:crear' %}?negocio={{ negocio.pk }}">Crear sucursal</a>
+        <a class="button" href="{% url 'servicios:crear' %}?negocio={{ negocio.pk }}">Crear servicio</a>
+        <a class="button" href="{% url 'profesionales:crear' %}?negocio={{ negocio.pk }}">Crear profesional</a>
+        <a class="button" href="{% url 'clientes:crear' %}?negocio={{ negocio.pk }}">Crear cliente</a>
+        <a class="button button-secondary" href="{% url 'disponibilidades:crear' %}?negocio={{ negocio.pk }}">Crear disponibilidad</a>
+        <a class="button button-secondary" href="{% url 'excepciones:crear' %}?negocio={{ negocio.pk }}">Crear excepcion</a>
+        <a class="button button-secondary" href="{% url 'turnos:crear' %}?negocio={{ negocio.pk }}">Crear turno</a>
+        {% if configuracion %}
+            <a class="button button-secondary" href="{% url 'configuracion_negocio:detalle' configuracion.pk %}">Ver configuracion</a>
+            <a class="button button-secondary" href="{% url 'configuracion_negocio:editar' configuracion.pk %}">Editar configuracion</a>
+        {% else %}
+            <a class="button button-secondary" href="{% url 'configuracion_negocio:crear' %}?negocio={{ negocio.pk }}">Crear configuracion</a>
+        {% endif %}
+    </div>
+</section>
+
+<section class="panel">
     <h2>Datos del negocio</h2>
     <dl class="detail-grid">
         <div class="detail-item">

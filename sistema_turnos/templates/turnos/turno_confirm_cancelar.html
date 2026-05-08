@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Cancelar turno | Turnos{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/turnos.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/turnos.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Turnos</p>
+        <h1>Cancelar turno</h1>
+    </div>
+    <a class="button button-secondary" href="{% url 'turnos:detalle' turno.pk %}">Volver</a>
+</section>
+
+<section class="panel">
+    <h2>{{ turno.fecha_hora_inicio|date:"d/m/Y H:i" }} - {{ turno.cliente.nombre_visible }}</h2>
+    <p class="muted">El turno quedara cancelado y se conservara su historial.</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="field span-2">
+            <label for="motivo_cancelacion">Motivo de cancelacion</label>
+            <textarea class="input" id="motivo_cancelacion" name="motivo_cancelacion" rows="4">{{ turno.motivo_cancelacion }}</textarea>
+        </div>
+        <div class="form-actions">
+            <button class="button-danger" type="submit">Cancelar turno</button>
+            <a class="button button-secondary" href="{% url 'turnos:detalle' turno.pk %}">Volver</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

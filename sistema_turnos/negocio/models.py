@@ -91,6 +91,7 @@ class Negocio(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
+            # TODO: antes de produccion, generar slugs unicos de forma robusta.
             self.slug = slugify(self.nombre)
         if not self.nombre_visible:
             self.nombre_visible = self.nombre

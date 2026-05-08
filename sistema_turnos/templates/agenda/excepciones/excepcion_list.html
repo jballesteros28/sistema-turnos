@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Excepciones | Sistema de turnos{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/agenda.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/agenda.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Agenda</p>
+        <h1>Excepciones</h1>
+    </div>
+    <a class="button" href="{% url 'excepciones:crear' %}">Nueva excepcion</a>
+</section>
+
+<form class="toolbar toolbar-excepciones" method="get">
+    <input class="input" type="search" name="q" value="{{ query }}" placeholder="Buscar excepciones">
+    <select class="input" name="negocio">
+        <option value="">Todos los negocios</option>
+        {% for negocio in negocios %}
+            <option value="{{ negocio.pk }}" {% if negocio.pk|stringformat:"s" == negocio_actual %}selected{% endif %}>{{ negocio.nombre }}</option>
+        {% endfor %}
+    </select>
+    <select class="input" name="sucursal">
+        <option value="">Todas las sucursales</option>
+        {% for sucursal in sucursales %}
+            <option value="{{ sucursal.pk }}" {% if sucursal.pk|stringformat:"s" == sucursal_actual %}selected{% endif %}>{{ sucursal.negocio.nombre }} - {{ sucursal.nombre }}</option>
+        {% endfor %}
+    </select>
+    <select class="input" name="profesional">
+        <option value="">Todos los profesionales</option>
+        {% for profesional in profesionales %}
+            <option value="{{ profesional.pk }}" {% if profesional.pk|stringformat:"s" == profesional_actual %}selected{% endif %}>{{ profesional.negocio.nombre }} - {{ profesional.nombre_visible }}</option>
+        {% endfor %}
+    </select>
+    <select class="input" name="tipo">
+        <option value="">Todos los tipos</option>
+        {% for value, label in tipos %}
+            <option value="{{ value }}" {% if value == tipo_actual %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <input class="input" type="date" name="fecha" value="{{ fecha_actual }}">
+    <select class="input" name="estado">
+        <option value="">Todos los estados</option>
+        {% for value, label in estados %}
+            <option value="{{ value }}" {% if value == estado_actual %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Buscar</button>
+    {% if query or negocio_actual or sucursal_actual or profesional_actual or tipo_actual or fecha_actual or estado_actual %}
+        <a class="button button-secondary" href="{% url 'excepciones:lista' %}">Limpiar</a>
+    {% endif %}
+</form>
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Excepcion</th>
+                <th>Negocio</th>
+                <th>Alcance</th>
+                <th>Tipo</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th>Estado</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for excepcion in excepciones %}
+                <tr>
+                    <td>
+                        <a href="{% url 'excepciones:detalle' excepcion.pk %}">{{ excepcion.titulo }}</a>
+                        {% if excepcion.bloquea_turnos %}
+                            <div class="small muted">Bloquea turnos</div>
+                        {% else %}
+                            <div class="small muted">Informativa</div>
+                        {% endif %}
+                    </td>
+                    <td>{{ excepcion.negocio }}</td>
+                    <td>
+                        {% if excepcion.profesional %}
+                            Profesional: {{ excepcion.profesional.nombre_visible }}
+                        {% elif excepcion.sucursal %}
+                            Sucursal: {{ excepcion.sucursal.nombre }}
+                        {% else %}
+                            Todo el negocio
+                        {% endif %}
+                    </td>
+                    <td>{{ excepcion.get_tipo_display }}</td>
+                    <td>{{ excepcion.fecha_hora_inicio|date:"d/m/Y H:i" }}</td>
+                    <td>{{ excepcion.fecha_hora_fin|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        {% if excepcion.activo %}
+                            <span class="badge badge-activo">Activa</span>
+                        {% else %}
+                            <span class="badge badge-inactivo">Inactiva</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="actions">
+                            <a href="{% url 'excepciones:detalle' excepcion.pk %}">Ver</a>
+                            <a href="{% url 'excepciones:editar' excepcion.pk %}">Editar</a>
+                        </div>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td class="empty" colspan="8">No hay excepciones.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if is_paginated %}
+    <nav class="pagination" aria-label="Paginacion">
+        {% if page_obj.has_previous %}
+            <a class="button button-secondary" href="?q={{ query|urlencode }}&negocio={{ negocio_actual }}&sucursal={{ sucursal_actual }}&profesional={{ profesional_actual }}&tipo={{ tipo_actual }}&fecha={{ fecha_actual }}&estado={{ estado_actual }}&page={{ page_obj.previous_page_number }}">Anterior</a>
+        {% endif %}
+        <span class="muted">Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a class="button button-secondary" href="?q={{ query|urlencode }}&negocio={{ negocio_actual }}&sucursal={{ sucursal_actual }}&profesional={{ profesional_actual }}&tipo={{ tipo_actual }}&fecha={{ fecha_actual }}&estado={{ estado_actual }}&page={{ page_obj.next_page_number }}">Siguiente</a>
+        {% endif %}
+    </nav>
+{% endif %}
+{% endblock %}

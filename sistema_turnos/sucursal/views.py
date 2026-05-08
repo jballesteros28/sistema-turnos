@@ -7,16 +7,24 @@ from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
 from negocio.models import Negocio
+from sistema_turnos.view_utils import get_query_initial
+from usuarios.mixins import (
+    GestionNegocioFormRequiredMixin,
+    GestionNegocioObjectRequiredMixin,
+    LoginRequiredUserFormMixin,
+)
+from usuarios.permissions import filtrar_por_negocios_permitidos, get_negocios_permitidos
 
 from .forms import SucursalForm
 from .models import EstadoSucursal, Sucursal
 
 
-class SucursalQuerySetMixin:
+class SucursalQuerySetMixin(LoginRequiredUserFormMixin):
     model = Sucursal
 
     def get_queryset(self):
-        return Sucursal.objects.select_related("negocio")
+        queryset = Sucursal.objects.select_related("negocio")
+        return filtrar_por_negocios_permitidos(queryset, self.request.user)
 
 
 class SucursalListView(SucursalQuerySetMixin, ListView):
@@ -57,7 +65,7 @@ class SucursalListView(SucursalQuerySetMixin, ListView):
         context["estado_actual"] = self.estado
         context["negocio_actual"] = self.negocio_id
         context["estados"] = EstadoSucursal.choices
-        context["negocios"] = Negocio.objects.order_by("nombre")
+        context["negocios"] = get_negocios_permitidos(self.request.user).order_by("nombre")
         return context
 
 
@@ -66,13 +74,23 @@ class SucursalDetailView(SucursalQuerySetMixin, DetailView):
     context_object_name = "sucursal"
 
 
-class SucursalCreateView(SucursalQuerySetMixin, CreateView):
+class SucursalCreateView(
+    GestionNegocioFormRequiredMixin,
+    SucursalQuerySetMixin,
+    CreateView,
+):
     form_class = SucursalForm
     template_name = "sucursales/sucursal_form.html"
+
+    def get_initial(self):
+        return get_query_initial(self.request, "negocio")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["titulo"] = "Nueva sucursal"
+        context["avisos_base"] = []
+        if not get_negocios_permitidos(self.request.user).exists():
+            context["avisos_base"].append("Primero debes crear un negocio para continuar.")
         return context
 
     def form_valid(self, form):
@@ -84,7 +102,11 @@ class SucursalCreateView(SucursalQuerySetMixin, CreateView):
         return reverse("sucursales:detalle", kwargs={"pk": self.object.pk})
 
 
-class SucursalUpdateView(SucursalQuerySetMixin, UpdateView):
+class SucursalUpdateView(
+    GestionNegocioObjectRequiredMixin,
+    SucursalQuerySetMixin,
+    UpdateView,
+):
     form_class = SucursalForm
     template_name = "sucursales/sucursal_form.html"
     context_object_name = "sucursal"
@@ -103,7 +125,11 @@ class SucursalUpdateView(SucursalQuerySetMixin, UpdateView):
         return reverse("sucursales:detalle", kwargs={"pk": self.object.pk})
 
 
-class SucursalDesactivarView(SucursalQuerySetMixin, View):
+class SucursalDesactivarView(
+    GestionNegocioObjectRequiredMixin,
+    SucursalQuerySetMixin,
+    View,
+):
     template_name = "sucursales/sucursal_confirm_desactivar.html"
 
     def get_object(self):
@@ -129,7 +155,11 @@ class SucursalDesactivarView(SucursalQuerySetMixin, View):
         return redirect("sucursales:detalle", pk=sucursal.pk)
 
 
-class SucursalActivarView(SucursalQuerySetMixin, View):
+class SucursalActivarView(
+    GestionNegocioObjectRequiredMixin,
+    SucursalQuerySetMixin,
+    View,
+):
     def post(self, request, *args, **kwargs):
         sucursal = get_object_or_404(self.get_queryset(), pk=self.kwargs["pk"])
         sucursal.estado = EstadoSucursal.ACTIVA

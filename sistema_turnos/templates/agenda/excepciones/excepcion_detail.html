@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ excepcion.titulo }} | Excepciones{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/agenda.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/agenda.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">{{ excepcion.negocio }}</p>
+        <h1>{{ excepcion.titulo }}</h1>
+        <div class="meta">
+            {% if excepcion.activo %}
+                <span class="badge badge-activo">Activa</span>
+            {% else %}
+                <span class="badge badge-inactivo">Inactiva</span>
+            {% endif %}
+        </div>
+    </div>
+    <div class="actions">
+        <a class="button button-secondary" href="{% url 'excepciones:lista' %}">Volver</a>
+        <a class="button" href="{% url 'excepciones:editar' excepcion.pk %}">Editar</a>
+        {% if excepcion.activo %}
+            <a class="button button-danger" href="{% url 'excepciones:desactivar' excepcion.pk %}">Desactivar</a>
+        {% else %}
+            <form method="post" action="{% url 'excepciones:activar' excepcion.pk %}">
+                {% csrf_token %}
+                <button type="submit">Activar</button>
+            </form>
+        {% endif %}
+    </div>
+</section>
+
+<section class="panel">
+    <h2>Datos de la excepcion</h2>
+    <dl class="detail-grid">
+        <div class="detail-item">
+            <dt>Tipo</dt>
+            <dd>{{ excepcion.get_tipo_display }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Alcance</dt>
+            <dd>
+                {% if excepcion.profesional %}
+                    Profesional: {{ excepcion.profesional.nombre_visible }}
+                {% elif excepcion.sucursal %}
+                    Sucursal: {{ excepcion.sucursal.nombre }}
+                {% else %}
+                    Todo el negocio
+                {% endif %}
+            </dd>
+        </div>
+        <div class="detail-item">
+            <dt>Sucursal</dt>
+            <dd>{{ excepcion.sucursal.nombre|default:"-" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Profesional</dt>
+            <dd>{{ excepcion.profesional.nombre_visible|default:"-" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Inicio</dt>
+            <dd>{{ excepcion.fecha_hora_inicio|date:"d/m/Y H:i" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Fin</dt>
+            <dd>{{ excepcion.fecha_hora_fin|date:"d/m/Y H:i" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Bloquea turnos</dt>
+            <dd>{% if excepcion.bloquea_turnos %}Si{% else %}No{% endif %}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Activa</dt>
+            <dd>{% if excepcion.activo %}Si{% else %}No{% endif %}</dd>
+        </div>
+        <div class="detail-item span-2">
+            <dt>Descripcion</dt>
+            <dd>{{ excepcion.descripcion|linebreaksbr|default:"-" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Creada</dt>
+            <dd>{{ excepcion.creado_en|date:"d/m/Y H:i" }}</dd>
+        </div>
+        <div class="detail-item">
+            <dt>Actualizada</dt>
+            <dd>{{ excepcion.actualizado_en|date:"d/m/Y H:i" }}</dd>
+        </div>
+    </dl>
+</section>
+{% endblock %}

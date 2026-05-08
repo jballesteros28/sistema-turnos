@@ -1,0 +1,38 @@
+.toolbar-turnos {
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.turno-horario {
+    font-weight: 700;
+}
+
+.badge-solicitado {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-confirmado {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.badge-cancelado {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-completado {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge-ausente {
+    background: #f3f4f6;
+    color: #4b5563;
+}
+
+@media (max-width: 768px) {
+    .toolbar-turnos {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,5 +1,5 @@
 .toolbar-sucursales {
-    grid-template-columns: 1fr 180px 220px auto auto;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
 .sucursal-ubicacion {
@@ -7,7 +7,7 @@
     gap: 2px;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
     .toolbar-sucursales {
         grid-template-columns: 1fr;
     }

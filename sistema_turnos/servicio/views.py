@@ -6,16 +6,24 @@ from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
 from negocio.models import Negocio
+from sistema_turnos.view_utils import get_query_initial
+from usuarios.mixins import (
+    GestionNegocioFormRequiredMixin,
+    GestionNegocioObjectRequiredMixin,
+    LoginRequiredUserFormMixin,
+)
+from usuarios.permissions import filtrar_por_negocios_permitidos, get_negocios_permitidos
 
 from .forms import ServicioForm
 from .models import EstadoServicio, Servicio
 
 
-class ServicioQuerySetMixin:
+class ServicioQuerySetMixin(LoginRequiredUserFormMixin):
     model = Servicio
 
     def get_queryset(self):
-        return Servicio.objects.select_related("negocio")
+        queryset = Servicio.objects.select_related("negocio")
+        return filtrar_por_negocios_permitidos(queryset, self.request.user)
 
 
 class ServicioListView(ServicioQuerySetMixin, ListView):
@@ -52,7 +60,7 @@ class ServicioListView(ServicioQuerySetMixin, ListView):
         context["estado_actual"] = self.estado
         context["negocio_actual"] = self.negocio_id
         context["estados"] = EstadoServicio.choices
-        context["negocios"] = Negocio.objects.order_by("nombre")
+        context["negocios"] = get_negocios_permitidos(self.request.user).order_by("nombre")
         return context
 
 
@@ -61,13 +69,23 @@ class ServicioDetailView(ServicioQuerySetMixin, DetailView):
     context_object_name = "servicio"
 
 
-class ServicioCreateView(ServicioQuerySetMixin, CreateView):
+class ServicioCreateView(
+    GestionNegocioFormRequiredMixin,
+    ServicioQuerySetMixin,
+    CreateView,
+):
     form_class = ServicioForm
     template_name = "servicios/servicio_form.html"
+
+    def get_initial(self):
+        return get_query_initial(self.request, "negocio")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["titulo"] = "Nuevo servicio"
+        context["avisos_base"] = []
+        if not get_negocios_permitidos(self.request.user).exists():
+            context["avisos_base"].append("Primero debes crear un negocio para continuar.")
         return context
 
     def form_valid(self, form):
@@ -79,7 +97,11 @@ class ServicioCreateView(ServicioQuerySetMixin, CreateView):
         return reverse("servicios:detalle", kwargs={"pk": self.object.pk})
 
 
-class ServicioUpdateView(ServicioQuerySetMixin, UpdateView):
+class ServicioUpdateView(
+    GestionNegocioObjectRequiredMixin,
+    ServicioQuerySetMixin,
+    UpdateView,
+):
     form_class = ServicioForm
     template_name = "servicios/servicio_form.html"
     context_object_name = "servicio"
@@ -98,7 +120,11 @@ class ServicioUpdateView(ServicioQuerySetMixin, UpdateView):
         return reverse("servicios:detalle", kwargs={"pk": self.object.pk})
 
 
-class ServicioDesactivarView(ServicioQuerySetMixin, View):
+class ServicioDesactivarView(
+    GestionNegocioObjectRequiredMixin,
+    ServicioQuerySetMixin,
+    View,
+):
     template_name = "servicios/servicio_confirm_desactivar.html"
 
     def get_object(self):
@@ -115,7 +141,11 @@ class ServicioDesactivarView(ServicioQuerySetMixin, View):
         return redirect("servicios:detalle", pk=servicio.pk)
 
 
-class ServicioActivarView(ServicioQuerySetMixin, View):
+class ServicioActivarView(
+    GestionNegocioObjectRequiredMixin,
+    ServicioQuerySetMixin,
+    View,
+):
     def post(self, request, *args, **kwargs):
         servicio = get_object_or_404(self.get_queryset(), pk=self.kwargs["pk"])
         servicio.estado = EstadoServicio.ACTIVO

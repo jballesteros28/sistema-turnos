@@ -1,0 +1,87 @@
+.dashboard {
+    display: grid;
+    gap: 18px;
+}
+
+.dashboard-section {
+    display: grid;
+    gap: 12px;
+}
+
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+}
+
+.metric-card {
+    min-height: 112px;
+    display: grid;
+    align-content: space-between;
+    gap: 14px;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+}
+
+.metric-card:hover {
+    border-color: var(--primary);
+    text-decoration: none;
+}
+
+.metric-label {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.metric-value {
+    font-size: 32px;
+    line-height: 1;
+}
+
+.dashboard-columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    align-items: start;
+}
+
+.dashboard-panel {
+    min-width: 0;
+}
+
+.dashboard-table {
+    min-width: 680px;
+}
+
+.dashboard-empty {
+    margin: 0;
+}
+
+.dashboard-actions-panel {
+    margin-top: 0;
+}
+
+.dashboard-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+}
+
+.dashboard-actions .button {
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .dashboard-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .metric-grid,
+    .dashboard-actions {
+        grid-template-columns: 1fr;
+    }
+}

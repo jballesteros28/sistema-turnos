@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ titulo }} | Configuracion{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/configuracion.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/configuracion.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Configuracion</p>
+        <h1>{{ titulo }}</h1>
+    </div>
+    <a class="button button-secondary" href="{% if configuracion %}{% url 'configuracion_negocio:detalle' configuracion.pk %}{% else %}{% url 'configuracion_negocio:lista' %}{% endif %}">Cancelar</a>
+</section>
+
+{% if avisos_base %}
+    <div class="notice-list">
+        {% for aviso in avisos_base %}
+            <div class="notice">{{ aviso }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<form class="panel" method="post" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+        {{ form.non_field_errors }}
+    {% endif %}
+
+    <div class="form-grid">
+        {% for field in form %}
+            <div class="field {% if field.name == 'negocio' %}span-2{% endif %}">
+                {% if field.field.widget.input_type == "checkbox" %}
+                    <label class="checkbox-label" for="{{ field.id_for_label }}">
+                        {{ field }}
+                        <span>{{ field.label }}</span>
+                    </label>
+                {% else %}
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                {% endif %}
+
+                {% if field.help_text %}
+                    <span class="help small">{{ field.help_text }}</span>
+                {% endif %}
+
+                {% if field.errors %}
+                    {{ field.errors }}
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="form-actions">
+        <button type="submit">Guardar</button>
+        <a class="button button-secondary" href="{% if configuracion %}{% url 'configuracion_negocio:detalle' configuracion.pk %}{% else %}{% url 'configuracion_negocio:lista' %}{% endif %}">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

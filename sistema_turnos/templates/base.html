@@ -13,15 +13,39 @@
 <body>
     <header class="app-header">
         <div class="header-inner">
-            <a class="brand" href="{% url 'negocios:lista' %}">Sistema de turnos</a>
-            <nav class="nav" aria-label="Principal">
-                <a href="{% url 'negocios:lista' %}">Negocios</a>
-                <a href="{% url 'sucursales:lista' %}">Sucursales</a>
-                <a href="{% url 'clientes:lista' %}">Clientes</a>
-                <a href="{% url 'servicios:lista' %}">Servicios</a>
-                <a href="{% url 'profesionales:lista' %}">Profesionales</a>
-                <a href="/admin/">Admin</a>
-            </nav>
+            <a class="brand" href="{% url 'core:dashboard' %}">Sistema de turnos</a>
+            <div class="header-actions">
+                {% if user.is_authenticated %}
+                    <nav class="nav" aria-label="Principal">
+                        <a href="{% url 'core:dashboard' %}">Dashboard</a>
+                        <a href="{% url 'negocios:lista' %}">Negocios</a>
+                        <a href="{% url 'sucursales:lista' %}">Sucursales</a>
+                        <a href="{% url 'clientes:lista' %}">Clientes</a>
+                        <a href="{% url 'servicios:lista' %}">Servicios</a>
+                        <a href="{% url 'profesionales:lista' %}">Profesionales</a>
+                        <a href="{% url 'disponibilidades:lista' %}">Disponibilidad</a>
+                        <a href="{% url 'excepciones:lista' %}">Excepciones</a>
+                        <a href="{% url 'turnos:lista' %}">Turnos</a>
+                        <a href="{% url 'agenda:turnos' %}">Agenda</a>
+                        <a href="{% url 'configuracion_negocio:lista' %}">Configuracion</a>
+                        <a href="/admin/">Admin</a>
+                    </nav>
+                    <div class="user-menu">
+                        <span>Hola, {{ user.username }}</span>
+                        {% if rol_actual_usuario %}
+                            <span class="badge">{{ rol_actual_usuario }}</span>
+                        {% endif %}
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button class="link-button" type="submit">Salir</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <nav class="nav" aria-label="Principal">
+                        <a href="{% url 'login' %}">Ingresar</a>
+                    </nav>
+                {% endif %}
+            </div>
         </div>
     </header>
 
@@ -32,6 +56,10 @@
                     <div class="message">{{ message }}</div>
                 {% endfor %}
             </div>
+        {% endif %}
+
+        {% if user.is_authenticated and usuario_sin_membresias %}
+            <div class="notice">No tenes negocios asignados. Contacta a un administrador.</div>
         {% endif %}
 
         {% block content %}{% endblock %}

@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Configuracion | Sistema de turnos{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/configuracion.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/configuracion.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Configuracion</p>
+        <h1>Configuraciones de negocio</h1>
+    </div>
+    <a class="button" href="{% url 'configuracion_negocio:crear' %}">Nueva configuracion</a>
+</section>
+
+<form class="toolbar toolbar-configuracion" method="get">
+    <input class="input" type="search" name="q" value="{{ query }}" placeholder="Buscar negocio">
+    <select class="input" name="negocio">
+        <option value="">Todos los negocios</option>
+        {% for negocio in negocios %}
+            <option value="{{ negocio.pk }}" {% if negocio.pk|stringformat:"s" == negocio_actual %}selected{% endif %}>{{ negocio.nombre }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Buscar</button>
+    {% if query or negocio_actual %}
+        <a class="button button-secondary" href="{% url 'configuracion_negocio:lista' %}">Limpiar</a>
+    {% endif %}
+</form>
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Negocio</th>
+                <th>Confirmacion</th>
+                <th>Reserva</th>
+                <th>Buffer</th>
+                <th>Cancelacion</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for configuracion in configuraciones %}
+                <tr>
+                    <td>
+                        <a href="{% url 'configuracion_negocio:detalle' configuracion.pk %}">{{ configuracion.negocio.nombre_visible }}</a>
+                        <div class="small muted">{{ configuracion.negocio.email_principal }}</div>
+                    </td>
+                    <td>{{ configuracion.get_politica_confirmacion_display }}</td>
+                    <td>
+                        <span>{{ configuracion.anticipacion_minima_reserva_minutos }} min min.</span>
+                        <div class="small muted">{{ configuracion.anticipacion_maxima_reserva_dias }} dias max.</div>
+                    </td>
+                    <td>{{ configuracion.buffer_entre_turnos_minutos }} min</td>
+                    <td>
+                        {% if configuracion.permite_cancelacion_online %}
+                            Permitida
+                            <div class="small muted">{{ configuracion.tiempo_minimo_cancelacion_minutos }} min antes</div>
+                        {% else %}
+                            No permitida
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="actions">
+                            <a href="{% url 'configuracion_negocio:detalle' configuracion.pk %}">Ver</a>
+                            <a href="{% url 'configuracion_negocio:editar' configuracion.pk %}">Editar</a>
+                        </div>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td class="empty" colspan="6">No hay configuraciones.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if is_paginated %}
+    <nav class="pagination" aria-label="Paginacion">
+        {% if page_obj.has_previous %}
+            <a class="button button-secondary" href="?q={{ query|urlencode }}&negocio={{ negocio_actual }}&page={{ page_obj.previous_page_number }}">Anterior</a>
+        {% endif %}
+        <span class="muted">Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a class="button button-secondary" href="?q={{ query|urlencode }}&negocio={{ negocio_actual }}&page={{ page_obj.next_page_number }}">Siguiente</a>
+        {% endif %}
+    </nav>
+{% endif %}
+{% endblock %}

@@ -52,6 +52,7 @@ class Servicio(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
+            # TODO: antes de produccion, generar slugs unicos por negocio.
             self.slug = slugify(self.nombre)
         super().save(*args, **kwargs)
 

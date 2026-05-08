@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class PoliticaConfirmacion(models.TextChoices):
@@ -25,8 +26,10 @@ class ConfiguracionNegocio(models.Model):
     anticipacion_maxima_reserva_dias = models.PositiveIntegerField(default=30)
     tiempo_minimo_cancelacion_minutos = models.PositiveIntegerField(default=120)
     buffer_default_minutos = models.PositiveSmallIntegerField(default=0)
+    buffer_entre_turnos_minutos = models.PositiveIntegerField(default=0)
     intervalo_turnos_minutos = models.PositiveSmallIntegerField(default=15)
     recordatorio_horas_antes = models.PositiveSmallIntegerField(default=24)
+    permite_turnos_pasados = models.BooleanField(default=False)
 
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
@@ -47,3 +50,42 @@ class ConfiguracionNegocio(models.Model):
 
     def __str__(self):
         return f"Configuracion de {self.negocio}"
+
+    @property
+    def confirmacion_automatica(self):
+        return self.politica_confirmacion == PoliticaConfirmacion.AUTOMATICA
+
+    @property
+    def permite_cancelacion(self):
+        return self.permite_cancelacion_online
+
+
+class ConfiguracionTurnosDefaults:
+    permite_reserva_online = True
+    permite_cancelacion_online = True
+    politica_confirmacion = PoliticaConfirmacion.MANUAL
+    anticipacion_minima_reserva_minutos = 0
+    anticipacion_maxima_reserva_dias = 30
+    tiempo_minimo_cancelacion_minutos = 0
+    buffer_default_minutos = 0
+    buffer_entre_turnos_minutos = 0
+    intervalo_turnos_minutos = 15
+    permite_turnos_pasados = False
+
+    @property
+    def confirmacion_automatica(self):
+        return False
+
+    @property
+    def permite_cancelacion(self):
+        return self.permite_cancelacion_online
+
+
+def get_configuracion_turnos(negocio):
+    if not negocio:
+        return ConfiguracionTurnosDefaults()
+
+    try:
+        return negocio.configuracion
+    except ObjectDoesNotExist:
+        return ConfiguracionTurnosDefaults()

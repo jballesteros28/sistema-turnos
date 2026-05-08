@@ -1,12 +1,12 @@
 .toolbar-servicios {
-    grid-template-columns: 1fr 160px 220px auto auto;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
 .servicio-precio {
     font-weight: 700;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
     .toolbar-servicios {
         grid-template-columns: 1fr;
     }

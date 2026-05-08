@@ -1,0 +1,91 @@
+.toolbar-agenda {
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.toolbar-excepciones {
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.toolbar-agenda-turnos {
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.agenda-page-header {
+    margin-bottom: 14px;
+}
+
+.agenda-date-nav {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.agenda-date-nav .button {
+    min-width: 150px;
+}
+
+.agenda-horario {
+    font-weight: 700;
+}
+
+.agenda-turnos-table {
+    min-width: 980px;
+}
+
+.agenda-actions {
+    gap: 8px;
+}
+
+.agenda-actions form {
+    margin: 0;
+}
+
+.agenda-actions .button,
+.agenda-actions button {
+    min-height: 32px;
+    padding: 5px 10px;
+    font-size: 13px;
+}
+
+.badge-solicitado {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-confirmado {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.badge-cancelado {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-completado {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge-ausente {
+    background: #f3f4f6;
+    color: #4b5563;
+}
+
+@media (max-width: 768px) {
+    .toolbar-agenda,
+    .toolbar-excepciones,
+    .toolbar-agenda-turnos {
+        grid-template-columns: 1fr;
+    }
+
+    .agenda-date-nav {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .agenda-date-nav .button {
+        width: 100%;
+    }
+}
