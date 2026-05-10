@@ -64,7 +64,12 @@ class TurnoForm(forms.ModelForm):
         self.label_suffix = ""
         self._configuracion_turnos = None
         self.fields["fecha_hora_inicio"].input_formats = ["%Y-%m-%dT%H:%M"]
-        limitar_querysets_por_usuario(self, self.user, turnos=True)
+        limitar_querysets_por_usuario(
+            self,
+            self.user,
+            turnos=True,
+            gestion_operacion=True,
+        )
 
         for field in self.fields.values():
             if isinstance(field.widget, forms.CheckboxInput):

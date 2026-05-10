@@ -9,15 +9,18 @@ from clientes.models import Cliente, EstadoCliente
 from configuracion_negocio.models import ConfiguracionNegocio
 from disponibilidad.models import Disponibilidad
 from excepcion.models import ExcepcionAgenda
-from negocio.models import EstadoNegocio, Negocio
+from negocio.models import EstadoNegocio
 from profesional.models import EstadoProfesional, Profesional
 from servicio.models import EstadoServicio, Servicio
 from sucursal.models import EstadoSucursal, Sucursal
 from turnos.models import EstadoTurno, Turno
 from usuarios.permissions import (
-    filtrar_por_negocios_permitidos,
+    filtrar_por_negocios_gestionables,
+    filtrar_por_negocios_operacion,
     filtrar_turnos_por_usuario,
     get_negocios_permitidos,
+    get_negocios_visibles,
+    get_permisos_ui,
     usuario_tiene_membresias,
 )
 
@@ -52,75 +55,142 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             fecha_hora_inicio__gte=today_start,
             fecha_hora_inicio__lt=tomorrow_start,
         ).order_by("fecha_hora_inicio")
+        permisos = get_permisos_ui(user)
         negocios = get_negocios_permitidos(user)
-        sucursales = filtrar_por_negocios_permitidos(Sucursal.objects, user)
-        clientes = filtrar_por_negocios_permitidos(Cliente.objects, user)
-        servicios = filtrar_por_negocios_permitidos(Servicio.objects, user)
-        profesionales = filtrar_por_negocios_permitidos(Profesional.objects, user)
-        disponibilidades = filtrar_por_negocios_permitidos(Disponibilidad.objects, user)
-        excepciones = filtrar_por_negocios_permitidos(ExcepcionAgenda.objects, user)
-        configuraciones = filtrar_por_negocios_permitidos(
+        negocios_visibles = get_negocios_visibles(user)
+        sucursales = filtrar_por_negocios_operacion(Sucursal.objects, user)
+        clientes = filtrar_por_negocios_operacion(Cliente.objects, user)
+        servicios = filtrar_por_negocios_operacion(Servicio.objects, user)
+        profesionales = filtrar_por_negocios_operacion(Profesional.objects, user)
+        disponibilidades = filtrar_por_negocios_operacion(Disponibilidad.objects, user)
+        excepciones = filtrar_por_negocios_operacion(ExcepcionAgenda.objects, user)
+        configuraciones = filtrar_por_negocios_gestionables(
             ConfiguracionNegocio.objects,
             user,
         )
 
-        metric_cards = [
-            {
-                "label": "Negocios activos",
-                "value": negocios.filter(estado=EstadoNegocio.ACTIVO).count(),
-                "url": reverse("negocios:lista"),
-            },
-            {
-                "label": "Sucursales activas",
-                "value": sucursales.filter(estado=EstadoSucursal.ACTIVA).count(),
-                "url": reverse("sucursales:lista"),
-            },
-            {
-                "label": "Clientes activos",
-                "value": clientes.filter(estado=EstadoCliente.ACTIVO).count(),
-                "url": reverse("clientes:lista"),
-            },
-            {
-                "label": "Servicios activos",
-                "value": servicios.filter(estado=EstadoServicio.ACTIVO).count(),
-                "url": reverse("servicios:lista"),
-            },
-            {
-                "label": "Profesionales activos",
-                "value": profesionales.filter(estado=EstadoProfesional.ACTIVO).count(),
-                "url": reverse("profesionales:lista"),
-            },
-            {
-                "label": "Disponibilidades activas",
-                "value": disponibilidades.filter(activo=True).count(),
-                "url": reverse("disponibilidades:lista"),
-            },
-            {
-                "label": "Excepciones activas",
-                "value": excepciones.filter(activo=True).count(),
-                "url": reverse("excepciones:lista"),
-            },
-            {
-                "label": "Turnos de hoy",
-                "value": turnos_hoy.count(),
-                "url": reverse("turnos:lista"),
-            },
-            {
-                "label": "Turnos solicitados",
-                "value": turnos.filter(estado=EstadoTurno.SOLICITADO).count(),
-                "url": reverse("turnos:lista"),
-            },
-            {
-                "label": "Turnos confirmados",
-                "value": turnos.filter(estado=EstadoTurno.CONFIRMADO).count(),
-                "url": reverse("turnos:lista"),
-            },
-            {
-                "label": "Configuraciones",
-                "value": configuraciones.count(),
-                "url": reverse("configuracion_negocio:lista"),
-            },
-        ]
+        metric_cards = []
+        if permisos["puede_ver_negocios"]:
+            metric_cards.append(
+                {
+                    "label": "Negocios activos",
+                    "value": negocios_visibles.filter(estado=EstadoNegocio.ACTIVO).count(),
+                    "url": reverse("negocios:lista"),
+                }
+            )
+        if permisos["puede_ver_catalogos"]:
+            metric_cards.extend(
+                [
+                    {
+                        "label": "Sucursales activas",
+                        "value": sucursales.filter(estado=EstadoSucursal.ACTIVA).count(),
+                        "url": reverse("sucursales:lista"),
+                    },
+                    {
+                        "label": "Servicios activos",
+                        "value": servicios.filter(estado=EstadoServicio.ACTIVO).count(),
+                        "url": reverse("servicios:lista"),
+                    },
+                    {
+                        "label": "Profesionales activos",
+                        "value": profesionales.filter(
+                            estado=EstadoProfesional.ACTIVO,
+                        ).count(),
+                        "url": reverse("profesionales:lista"),
+                    },
+                ]
+            )
+        if permisos["puede_ver_clientes"]:
+            metric_cards.append(
+                {
+                    "label": "Clientes activos",
+                    "value": clientes.filter(estado=EstadoCliente.ACTIVO).count(),
+                    "url": reverse("clientes:lista"),
+                }
+            )
+        if permisos["puede_ver_disponibilidades"]:
+            metric_cards.append(
+                {
+                    "label": "Disponibilidades activas",
+                    "value": disponibilidades.filter(activo=True).count(),
+                    "url": reverse("disponibilidades:lista"),
+                }
+            )
+        if permisos["puede_ver_excepciones"]:
+            metric_cards.append(
+                {
+                    "label": "Excepciones activas",
+                    "value": excepciones.filter(activo=True).count(),
+                    "url": reverse("excepciones:lista"),
+                }
+            )
+        if permisos["puede_ver_turnos"]:
+            metric_cards.extend(
+                [
+                    {
+                        "label": "Turnos de hoy",
+                        "value": turnos_hoy.count(),
+                        "url": reverse("turnos:lista"),
+                    },
+                    {
+                        "label": "Turnos solicitados",
+                        "value": turnos.filter(estado=EstadoTurno.SOLICITADO).count(),
+                        "url": reverse("turnos:lista"),
+                    },
+                    {
+                        "label": "Turnos confirmados",
+                        "value": turnos.filter(estado=EstadoTurno.CONFIRMADO).count(),
+                        "url": reverse("turnos:lista"),
+                    },
+                ]
+            )
+        if permisos["puede_ver_configuracion"]:
+            metric_cards.append(
+                {
+                    "label": "Configuraciones",
+                    "value": configuraciones.count(),
+                    "url": reverse("configuracion_negocio:lista"),
+                }
+            )
+
+        quick_actions = []
+        if permisos["puede_crear_negocios"]:
+            quick_actions.append(
+                {"label": "Nuevo negocio", "url": reverse("negocios:crear")}
+            )
+        if permisos["puede_gestionar_negocios"]:
+            quick_actions.extend(
+                [
+                    {"label": "Nueva sucursal", "url": reverse("sucursales:crear")},
+                    {"label": "Nuevo servicio", "url": reverse("servicios:crear")},
+                    {
+                        "label": "Nuevo profesional",
+                        "url": reverse("profesionales:crear"),
+                    },
+                ]
+            )
+        if permisos["puede_gestionar_operacion"]:
+            quick_actions.extend(
+                [
+                    {"label": "Nuevo cliente", "url": reverse("clientes:crear")},
+                    {
+                        "label": "Nueva disponibilidad",
+                        "url": reverse("disponibilidades:crear"),
+                    },
+                    {
+                        "label": "Nueva excepcion",
+                        "url": reverse("excepciones:crear"),
+                    },
+                    {"label": "Nuevo turno", "url": reverse("turnos:crear")},
+                ]
+            )
+        if permisos["puede_ver_configuracion"]:
+            quick_actions.append(
+                {
+                    "label": "Configuraciones",
+                    "url": reverse("configuracion_negocio:lista"),
+                }
+            )
 
         context.update(
             {
@@ -132,29 +202,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 ).order_by("fecha_hora_inicio")[:10],
                 "hay_negocios": negocios.exists(),
                 "usuario_sin_negocios": not usuario_tiene_membresias(user),
-                "quick_actions": [
-                    {"label": "Nuevo negocio", "url": reverse("negocios:crear")},
-                    {"label": "Nueva sucursal", "url": reverse("sucursales:crear")},
-                    {"label": "Nuevo cliente", "url": reverse("clientes:crear")},
-                    {"label": "Nuevo servicio", "url": reverse("servicios:crear")},
-                    {
-                        "label": "Nuevo profesional",
-                        "url": reverse("profesionales:crear"),
-                    },
-                    {
-                        "label": "Nueva disponibilidad",
-                        "url": reverse("disponibilidades:crear"),
-                    },
-                    {
-                        "label": "Nueva excepcion",
-                        "url": reverse("excepciones:crear"),
-                    },
-                    {"label": "Nuevo turno", "url": reverse("turnos:crear")},
-                    {
-                        "label": "Configuraciones",
-                        "url": reverse("configuracion_negocio:lista"),
-                    },
-                ],
+                "quick_actions": quick_actions,
             }
         )
         return context

@@ -16,24 +16,28 @@
     </div>
     <div class="actions">
         <a class="button button-secondary" href="{% url 'clientes:lista' %}">Volver</a>
-        <a class="button" href="{% url 'clientes:editar' cliente.pk %}">Editar</a>
-        {% if cliente.estado == "activo" %}
-            <a class="button button-danger" href="{% url 'clientes:desactivar' cliente.pk %}">Desactivar</a>
-        {% elif cliente.estado == "inactivo" %}
-            <form method="post" action="{% url 'clientes:activar' cliente.pk %}">
-                {% csrf_token %}
-                <button type="submit">Activar</button>
-            </form>
+        {% if permisos_ui.puede_gestionar_operacion %}
+            <a class="button" href="{% url 'clientes:editar' cliente.pk %}">Editar</a>
+            {% if cliente.estado == "activo" %}
+                <a class="button button-danger" href="{% url 'clientes:desactivar' cliente.pk %}">Desactivar</a>
+            {% elif cliente.estado == "inactivo" %}
+                <form method="post" action="{% url 'clientes:activar' cliente.pk %}">
+                    {% csrf_token %}
+                    <button type="submit">Activar</button>
+                </form>
+            {% endif %}
         {% endif %}
     </div>
 </section>
 
+{% if permisos_ui.puede_gestionar_operacion %}
 <section class="panel">
     <h2>Accesos rapidos</h2>
     <div class="quick-actions">
         <a class="button" href="{% url 'turnos:crear' %}?negocio={{ cliente.negocio_id }}&cliente={{ cliente.pk }}">Crear turno</a>
     </div>
 </section>
+{% endif %}
 
 <section class="panel">
     <h2>Datos del cliente</h2>

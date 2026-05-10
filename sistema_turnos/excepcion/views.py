@@ -6,16 +6,16 @@ from django.utils.dateparse import parse_date
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
-from negocio.models import Negocio
 from profesional.models import Profesional
 from sistema_turnos.view_utils import get_query_initial
 from sucursal.models import Sucursal
 from usuarios.mixins import (
     GestionOperacionFormRequiredMixin,
     GestionOperacionObjectRequiredMixin,
+    GestionOperacionRequiredMixin,
     LoginRequiredUserFormMixin,
 )
-from usuarios.permissions import filtrar_por_negocios_permitidos, get_negocios_permitidos
+from usuarios.permissions import filtrar_por_negocios_operacion, get_negocios_operacion
 
 from .forms import ExcepcionAgendaForm
 from .models import ExcepcionAgenda, TipoExcepcion
@@ -36,7 +36,7 @@ class ExcepcionAgendaQuerySetMixin(LoginRequiredUserFormMixin):
             "sucursal",
             "profesional",
         )
-        return filtrar_por_negocios_permitidos(queryset, self.request.user)
+        return filtrar_por_negocios_operacion(queryset, self.request.user)
 
 
 class ExcepcionAgendaListView(ExcepcionAgendaQuerySetMixin, ListView):
@@ -101,15 +101,15 @@ class ExcepcionAgendaListView(ExcepcionAgendaQuerySetMixin, ListView):
         context["tipo_actual"] = self.tipo
         context["estado_actual"] = self.estado
         context["fecha_actual"] = self.fecha
-        context["negocios"] = get_negocios_permitidos(self.request.user).order_by("nombre")
-        context["sucursales"] = filtrar_por_negocios_permitidos(
+        context["negocios"] = get_negocios_operacion(self.request.user).order_by("nombre")
+        context["sucursales"] = filtrar_por_negocios_operacion(
             Sucursal.objects.select_related("negocio"),
             self.request.user,
         ).order_by(
             "negocio__nombre",
             "nombre",
         )
-        context["profesionales"] = filtrar_por_negocios_permitidos(
+        context["profesionales"] = filtrar_por_negocios_operacion(
             Profesional.objects.select_related("negocio"),
             self.request.user,
         ).order_by(
@@ -128,6 +128,7 @@ class ExcepcionAgendaDetailView(ExcepcionAgendaQuerySetMixin, DetailView):
 
 
 class ExcepcionAgendaCreateView(
+    GestionOperacionRequiredMixin,
     GestionOperacionFormRequiredMixin,
     ExcepcionAgendaQuerySetMixin,
     CreateView,
@@ -142,7 +143,7 @@ class ExcepcionAgendaCreateView(
         context = super().get_context_data(**kwargs)
         context["titulo"] = "Nueva excepcion"
         context["avisos_base"] = []
-        if not get_negocios_permitidos(self.request.user).exists():
+        if not get_negocios_operacion(self.request.user).exists():
             context["avisos_base"].append("Primero debes crear un negocio para continuar.")
         return context
 

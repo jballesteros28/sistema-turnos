@@ -82,13 +82,25 @@ MiembroNegocio.objects.create(
 
 Para usuarios con rol `profesional`, asociar tambien el campo `profesional`.
 
-### Roles disponibles
+## Roles y permisos
 
-- `superuser` de Django: ve todo.
-- `superadmin`: ve todo dentro del sistema.
-- `admin_negocio`: gestiona todo dentro de su negocio.
-- `recepcionista`: gestiona clientes, turnos y agenda; ve catalogos del negocio.
-- `profesional`: ve solo sus turnos y agenda si tiene un profesional asociado.
+- `superuser` de Django: puede ver y gestionar todo el sistema, acceder al admin
+  de Django y ver todos los negocios.
+- `superadmin`: puede ver todo el sistema, gestionar todos los negocios y
+  acceder a datos globales desde la aplicacion.
+- `admin_negocio`: ve solo sus negocios asignados y gestiona negocio,
+  sucursales, clientes, servicios, profesionales, configuracion,
+  disponibilidad, excepciones y turnos de esos negocios.
+- `recepcionista`: ve solo sus negocios asignados. Puede gestionar operacion
+  diaria como clientes, turnos, agenda, disponibilidad y excepciones. Puede ver
+  sucursales, servicios y profesionales, pero no edita configuracion ni datos
+  sensibles del negocio.
+- `profesional`: ve su agenda y sus turnos. No ve turnos de otros
+  profesionales, no gestiona configuracion, negocio, servicios globales ni otros
+  profesionales.
+- Usuario sin membresia: puede iniciar sesion, pero no ve navegacion ni datos
+  operativos. El sistema muestra el aviso "No tenés negocios asignados.
+  Contactá a un administrador.".
 
 ## Rutas principales
 

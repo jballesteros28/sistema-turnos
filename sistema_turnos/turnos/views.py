@@ -20,13 +20,13 @@ from sucursal.models import Sucursal
 from usuarios.mixins import (
     GestionOperacionFormRequiredMixin,
     GestionOperacionObjectRequiredMixin,
+    GestionOperacionRequiredMixin,
     LoginRequiredUserFormMixin,
 )
 from usuarios.permissions import (
-    filtrar_por_negocios_permitidos,
+    filtrar_por_negocios_operacion,
     filtrar_turnos_por_usuario,
-    get_negocios_permitidos,
-    get_profesionales_permitidos_para_turnos,
+    get_negocios_operacion,
 )
 
 from .forms import TurnoForm
@@ -111,38 +111,56 @@ class TurnoListView(TurnoQuerySetMixin, ListView):
         context["servicio_actual"] = self.servicio_id
         context["fecha_actual"] = self.fecha
         context["estado_actual"] = self.estado
-        context["negocios"] = get_negocios_permitidos(self.request.user).order_by("nombre")
-        context["sucursales"] = filtrar_por_negocios_permitidos(
-            Sucursal.objects.select_related("negocio"),
-            self.request.user,
-        ).order_by(
-            "negocio__nombre",
-            "nombre",
-        )
-        context["profesionales"] = get_profesionales_permitidos_para_turnos(
-            self.request.user,
-        ).order_by(
-            "negocio__nombre",
-            "apellido",
-            "nombre",
-        )
-        context["clientes"] = filtrar_por_negocios_permitidos(
-            Cliente.objects.select_related("negocio"),
-            self.request.user,
-        ).order_by(
-            "negocio__nombre",
-            "apellido",
-            "nombre",
-        )
-        context["servicios"] = filtrar_por_negocios_permitidos(
-            Servicio.objects.select_related("negocio"),
-            self.request.user,
-        ).order_by(
-            "negocio__nombre",
-            "nombre",
-        )
+        choices = self._get_filter_choices()
+        context["negocios"] = choices["negocios"]
+        context["sucursales"] = choices["sucursales"]
+        context["profesionales"] = choices["profesionales"]
+        context["clientes"] = choices["clientes"]
+        context["servicios"] = choices["servicios"]
         context["estados"] = EstadoTurno.choices
         return context
+
+    def _get_filter_choices(self):
+        negocios_operacion = get_negocios_operacion(self.request.user)
+        if negocios_operacion.exists():
+            return {
+                "negocios": negocios_operacion.order_by("nombre"),
+                "sucursales": filtrar_por_negocios_operacion(
+                    Sucursal.objects.select_related("negocio"),
+                    self.request.user,
+                ).order_by("negocio__nombre", "nombre"),
+                "profesionales": filtrar_por_negocios_operacion(
+                    Profesional.objects.select_related("negocio"),
+                    self.request.user,
+                ).order_by("negocio__nombre", "apellido", "nombre"),
+                "clientes": filtrar_por_negocios_operacion(
+                    Cliente.objects.select_related("negocio"),
+                    self.request.user,
+                ).order_by("negocio__nombre", "apellido", "nombre"),
+                "servicios": filtrar_por_negocios_operacion(
+                    Servicio.objects.select_related("negocio"),
+                    self.request.user,
+                ).order_by("negocio__nombre", "nombre"),
+            }
+
+        turnos = filtrar_turnos_por_usuario(Turno.objects.all(), self.request.user)
+        return {
+            "negocios": Negocio.objects.filter(
+                id__in=turnos.values("negocio_id"),
+            ).order_by("nombre"),
+            "sucursales": Sucursal.objects.select_related("negocio").filter(
+                id__in=turnos.values("sucursal_id"),
+            ).order_by("negocio__nombre", "nombre"),
+            "profesionales": Profesional.objects.select_related("negocio").filter(
+                id__in=turnos.values("profesional_id"),
+            ).order_by("negocio__nombre", "apellido", "nombre"),
+            "clientes": Cliente.objects.select_related("negocio").filter(
+                id__in=turnos.values("cliente_id"),
+            ).order_by("negocio__nombre", "apellido", "nombre"),
+            "servicios": Servicio.objects.select_related("negocio").filter(
+                id__in=turnos.values("servicio_id"),
+            ).order_by("negocio__nombre", "nombre"),
+        }
 
 
 class TurnoDetailView(TurnoQuerySetMixin, DetailView):
@@ -151,6 +169,7 @@ class TurnoDetailView(TurnoQuerySetMixin, DetailView):
 
 
 class TurnoCreateView(
+    GestionOperacionRequiredMixin,
     GestionOperacionFormRequiredMixin,
     TurnoQuerySetMixin,
     CreateView,
@@ -178,30 +197,31 @@ class TurnoCreateView(
         avisos = []
         negocio_id = get_query_id(self.request, "negocio")
 
-        if not get_negocios_permitidos(self.request.user).exists():
+        if not get_negocios_operacion(self.request.user).exists():
             return ["Primero debes crear un negocio para continuar."]
 
         if negocio_id:
-            if not filtrar_por_negocios_permitidos(
+            if not filtrar_por_negocios_operacion(
                 Sucursal.objects.filter(negocio_id=negocio_id),
                 self.request.user,
             ).exists():
                 avisos.append("Primero debes crear una sucursal para este negocio.")
-            if not filtrar_por_negocios_permitidos(
+            if not filtrar_por_negocios_operacion(
                 Cliente.objects.filter(negocio_id=negocio_id),
                 self.request.user,
             ).exists():
                 avisos.append("Primero debes crear un cliente para este negocio.")
-            if not get_profesionales_permitidos_para_turnos(self.request.user).filter(
-                negocio_id=negocio_id,
+            if not filtrar_por_negocios_operacion(
+                Profesional.objects.filter(negocio_id=negocio_id),
+                self.request.user,
             ).exists():
                 avisos.append("Primero debes crear un profesional para este negocio.")
-            if not filtrar_por_negocios_permitidos(
+            if not filtrar_por_negocios_operacion(
                 Servicio.objects.filter(negocio_id=negocio_id),
                 self.request.user,
             ).exists():
                 avisos.append("Primero debes crear un servicio para este negocio.")
-            if not filtrar_por_negocios_permitidos(
+            if not filtrar_por_negocios_operacion(
                 Disponibilidad.objects.filter(negocio_id=negocio_id, activo=True),
                 self.request.user,
             ).exists():
@@ -209,15 +229,18 @@ class TurnoCreateView(
                     "Primero debes cargar disponibilidad para poder crear turnos."
                 )
         else:
-            if not filtrar_por_negocios_permitidos(Sucursal.objects, self.request.user).exists():
+            if not filtrar_por_negocios_operacion(Sucursal.objects, self.request.user).exists():
                 avisos.append("Primero debes crear una sucursal para continuar.")
-            if not filtrar_por_negocios_permitidos(Cliente.objects, self.request.user).exists():
+            if not filtrar_por_negocios_operacion(Cliente.objects, self.request.user).exists():
                 avisos.append("Primero debes crear un cliente para continuar.")
-            if not get_profesionales_permitidos_para_turnos(self.request.user).exists():
+            if not filtrar_por_negocios_operacion(
+                Profesional.objects,
+                self.request.user,
+            ).exists():
                 avisos.append("Primero debes crear un profesional para continuar.")
-            if not filtrar_por_negocios_permitidos(Servicio.objects, self.request.user).exists():
+            if not filtrar_por_negocios_operacion(Servicio.objects, self.request.user).exists():
                 avisos.append("Primero debes crear un servicio para continuar.")
-            if not filtrar_por_negocios_permitidos(
+            if not filtrar_por_negocios_operacion(
                 Disponibilidad.objects.filter(activo=True),
                 self.request.user,
             ).exists():

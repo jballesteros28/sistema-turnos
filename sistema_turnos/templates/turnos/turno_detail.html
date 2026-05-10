@@ -16,23 +16,25 @@
     </div>
     <div class="actions">
         <a class="button button-secondary" href="{% url 'turnos:lista' %}">Volver</a>
-        <a class="button" href="{% url 'turnos:editar' turno.pk %}">Editar</a>
-        {% if turno.estado == "solicitado" %}
-            <form method="post" action="{% url 'turnos:confirmar' turno.pk %}">
-                {% csrf_token %}
-                <button type="submit">Confirmar</button>
-            </form>
-        {% endif %}
-        {% if turno.estado == "solicitado" or turno.estado == "confirmado" %}
-            <form method="post" action="{% url 'turnos:completar' turno.pk %}">
-                {% csrf_token %}
-                <button type="submit">Completar</button>
-            </form>
-            <form method="post" action="{% url 'turnos:ausente' turno.pk %}">
-                {% csrf_token %}
-                <button class="button-secondary" type="submit">Ausente</button>
-            </form>
-            <a class="button button-danger" href="{% url 'turnos:cancelar' turno.pk %}">Cancelar</a>
+        {% if permisos_ui.puede_gestionar_operacion %}
+            <a class="button" href="{% url 'turnos:editar' turno.pk %}">Editar</a>
+            {% if turno.estado == "solicitado" %}
+                <form method="post" action="{% url 'turnos:confirmar' turno.pk %}">
+                    {% csrf_token %}
+                    <button type="submit">Confirmar</button>
+                </form>
+            {% endif %}
+            {% if turno.estado == "solicitado" or turno.estado == "confirmado" %}
+                <form method="post" action="{% url 'turnos:completar' turno.pk %}">
+                    {% csrf_token %}
+                    <button type="submit">Completar</button>
+                </form>
+                <form method="post" action="{% url 'turnos:ausente' turno.pk %}">
+                    {% csrf_token %}
+                    <button class="button-secondary" type="submit">Ausente</button>
+                </form>
+                <a class="button button-danger" href="{% url 'turnos:cancelar' turno.pk %}">Cancelar</a>
+            {% endif %}
         {% endif %}
     </div>
 </section>

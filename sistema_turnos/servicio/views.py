@@ -5,14 +5,18 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
-from negocio.models import Negocio
 from sistema_turnos.view_utils import get_query_initial
 from usuarios.mixins import (
     GestionNegocioFormRequiredMixin,
     GestionNegocioObjectRequiredMixin,
+    GestionNegocioRequiredMixin,
     LoginRequiredUserFormMixin,
 )
-from usuarios.permissions import filtrar_por_negocios_permitidos, get_negocios_permitidos
+from usuarios.permissions import (
+    filtrar_por_negocios_operacion,
+    get_negocios_gestionables,
+    get_negocios_operacion,
+)
 
 from .forms import ServicioForm
 from .models import EstadoServicio, Servicio
@@ -23,7 +27,7 @@ class ServicioQuerySetMixin(LoginRequiredUserFormMixin):
 
     def get_queryset(self):
         queryset = Servicio.objects.select_related("negocio")
-        return filtrar_por_negocios_permitidos(queryset, self.request.user)
+        return filtrar_por_negocios_operacion(queryset, self.request.user)
 
 
 class ServicioListView(ServicioQuerySetMixin, ListView):
@@ -60,7 +64,7 @@ class ServicioListView(ServicioQuerySetMixin, ListView):
         context["estado_actual"] = self.estado
         context["negocio_actual"] = self.negocio_id
         context["estados"] = EstadoServicio.choices
-        context["negocios"] = get_negocios_permitidos(self.request.user).order_by("nombre")
+        context["negocios"] = get_negocios_operacion(self.request.user).order_by("nombre")
         return context
 
 
@@ -70,6 +74,7 @@ class ServicioDetailView(ServicioQuerySetMixin, DetailView):
 
 
 class ServicioCreateView(
+    GestionNegocioRequiredMixin,
     GestionNegocioFormRequiredMixin,
     ServicioQuerySetMixin,
     CreateView,
@@ -84,7 +89,7 @@ class ServicioCreateView(
         context = super().get_context_data(**kwargs)
         context["titulo"] = "Nuevo servicio"
         context["avisos_base"] = []
-        if not get_negocios_permitidos(self.request.user).exists():
+        if not get_negocios_gestionables(self.request.user).exists():
             context["avisos_base"].append("Primero debes crear un negocio para continuar.")
         return context
 

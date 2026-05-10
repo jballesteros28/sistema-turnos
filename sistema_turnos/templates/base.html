@@ -18,17 +18,35 @@
                 {% if user.is_authenticated %}
                     <nav class="nav" aria-label="Principal">
                         <a href="{% url 'core:dashboard' %}">Dashboard</a>
-                        <a href="{% url 'negocios:lista' %}">Negocios</a>
-                        <a href="{% url 'sucursales:lista' %}">Sucursales</a>
-                        <a href="{% url 'clientes:lista' %}">Clientes</a>
-                        <a href="{% url 'servicios:lista' %}">Servicios</a>
-                        <a href="{% url 'profesionales:lista' %}">Profesionales</a>
-                        <a href="{% url 'disponibilidades:lista' %}">Disponibilidad</a>
-                        <a href="{% url 'excepciones:lista' %}">Excepciones</a>
-                        <a href="{% url 'turnos:lista' %}">Turnos</a>
-                        <a href="{% url 'agenda:turnos' %}">Agenda</a>
-                        <a href="{% url 'configuracion_negocio:lista' %}">Configuracion</a>
-                        <a href="/admin/">Admin</a>
+                        {% if permisos_ui.puede_ver_negocios %}
+                            <a href="{% url 'negocios:lista' %}">Negocios</a>
+                        {% endif %}
+                        {% if permisos_ui.puede_ver_catalogos %}
+                            <a href="{% url 'sucursales:lista' %}">Sucursales</a>
+                            <a href="{% url 'servicios:lista' %}">Servicios</a>
+                            <a href="{% url 'profesionales:lista' %}">Profesionales</a>
+                        {% endif %}
+                        {% if permisos_ui.puede_ver_clientes %}
+                            <a href="{% url 'clientes:lista' %}">Clientes</a>
+                        {% endif %}
+                        {% if permisos_ui.puede_ver_disponibilidades %}
+                            <a href="{% url 'disponibilidades:lista' %}">Disponibilidad</a>
+                        {% endif %}
+                        {% if permisos_ui.puede_ver_excepciones %}
+                            <a href="{% url 'excepciones:lista' %}">Excepciones</a>
+                        {% endif %}
+                        {% if permisos_ui.puede_ver_turnos %}
+                            <a href="{% url 'turnos:lista' %}">Turnos</a>
+                        {% endif %}
+                        {% if permisos_ui.puede_ver_agenda %}
+                            <a href="{% url 'agenda:turnos' %}">Agenda</a>
+                        {% endif %}
+                        {% if permisos_ui.puede_ver_configuracion %}
+                            <a href="{% url 'configuracion_negocio:lista' %}">Configuracion</a>
+                        {% endif %}
+                        {% if permisos_ui.puede_ver_admin_django %}
+                            <a href="/admin/">Admin</a>
+                        {% endif %}
                     </nav>
                     <div class="user-menu">
                         <span>Hola, {{ user.username }}</span>
@@ -59,7 +77,7 @@
         {% endif %}
 
         {% if user.is_authenticated and usuario_sin_membresias %}
-            <div class="notice">No tenes negocios asignados. Contacta a un administrador.</div>
+            <div class="notice">No tenés negocios asignados. Contactá a un administrador.</div>
         {% endif %}
 
         {% block content %}{% endblock %}

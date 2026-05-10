@@ -11,7 +11,9 @@
         <p class="eyebrow">Agenda</p>
         <h1>Disponibilidad</h1>
     </div>
-    <a class="button" href="{% url 'disponibilidades:crear' %}">Nueva disponibilidad</a>
+    {% if permisos_ui.puede_gestionar_operacion %}
+        <a class="button" href="{% url 'disponibilidades:crear' %}">Nueva disponibilidad</a>
+    {% endif %}
 </section>
 
 <form class="toolbar toolbar-agenda" method="get">
@@ -93,7 +95,9 @@
                     <td>
                         <div class="actions">
                             <a href="{% url 'disponibilidades:detalle' disponibilidad.pk %}">Ver</a>
-                            <a href="{% url 'disponibilidades:editar' disponibilidad.pk %}">Editar</a>
+                            {% if permisos_ui.puede_gestionar_operacion %}
+                                <a href="{% url 'disponibilidades:editar' disponibilidad.pk %}">Editar</a>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>

@@ -11,7 +11,9 @@
         <p class="eyebrow">Agenda</p>
         <h1>Excepciones</h1>
     </div>
-    <a class="button" href="{% url 'excepciones:crear' %}">Nueva excepcion</a>
+    {% if permisos_ui.puede_gestionar_operacion %}
+        <a class="button" href="{% url 'excepciones:crear' %}">Nueva excepcion</a>
+    {% endif %}
 </section>
 
 <form class="toolbar toolbar-excepciones" method="get">
@@ -101,7 +103,9 @@
                     <td>
                         <div class="actions">
                             <a href="{% url 'excepciones:detalle' excepcion.pk %}">Ver</a>
-                            <a href="{% url 'excepciones:editar' excepcion.pk %}">Editar</a>
+                            {% if permisos_ui.puede_gestionar_operacion %}
+                                <a href="{% url 'excepciones:editar' excepcion.pk %}">Editar</a>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>

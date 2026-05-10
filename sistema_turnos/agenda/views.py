@@ -12,8 +12,9 @@ from profesional.models import Profesional
 from sucursal.models import Sucursal
 from turnos.models import EstadoTurno, Turno
 from usuarios.permissions import (
-    filtrar_por_negocios_permitidos,
+    filtrar_por_negocios_operacion,
     filtrar_turnos_por_usuario,
+    get_negocios_operacion,
     get_negocios_permitidos,
     get_profesionales_permitidos_para_turnos,
 )
@@ -43,27 +44,16 @@ class AgendaDiariaView(LoginRequiredMixin, TemplateView):
         if estado:
             turnos = turnos.filter(estado=estado)
 
+        choices = self._get_filter_choices()
         context.update(
             {
                 "fecha_seleccionada": selected_date,
                 "fecha_actual": selected_date.isoformat(),
                 "fecha_invalida": fecha_invalida,
                 "turnos": turnos,
-                "negocios": get_negocios_permitidos(self.request.user).order_by("nombre"),
-                "sucursales": filtrar_por_negocios_permitidos(
-                    Sucursal.objects.select_related("negocio"),
-                    self.request.user,
-                ).order_by(
-                    "negocio__nombre",
-                    "nombre",
-                ),
-                "profesionales": get_profesionales_permitidos_para_turnos(
-                    self.request.user,
-                ).order_by(
-                    "negocio__nombre",
-                    "apellido",
-                    "nombre",
-                ),
+                "negocios": choices["negocios"],
+                "sucursales": choices["sucursales"],
+                "profesionales": choices["profesionales"],
                 "estados": EstadoTurno.choices,
                 "negocio_actual": negocio_id,
                 "sucursal_actual": sucursal_id,
@@ -97,6 +87,34 @@ class AgendaDiariaView(LoginRequiredMixin, TemplateView):
             }
         )
         return context
+
+    def _get_filter_choices(self):
+        negocios_operacion = get_negocios_operacion(self.request.user)
+        if negocios_operacion.exists():
+            return {
+                "negocios": negocios_operacion.order_by("nombre"),
+                "sucursales": filtrar_por_negocios_operacion(
+                    Sucursal.objects.select_related("negocio"),
+                    self.request.user,
+                ).order_by("negocio__nombre", "nombre"),
+                "profesionales": filtrar_por_negocios_operacion(
+                    Profesional.objects.select_related("negocio"),
+                    self.request.user,
+                ).order_by("negocio__nombre", "apellido", "nombre"),
+            }
+
+        turnos = filtrar_turnos_por_usuario(Turno.objects.all(), self.request.user)
+        return {
+            "negocios": Negocio.objects.filter(
+                id__in=turnos.values("negocio_id"),
+            ).order_by("nombre"),
+            "sucursales": Sucursal.objects.select_related("negocio").filter(
+                id__in=turnos.values("sucursal_id"),
+            ).order_by("negocio__nombre", "nombre"),
+            "profesionales": Profesional.objects.select_related("negocio").filter(
+                id__in=turnos.values("profesional_id"),
+            ).order_by("negocio__nombre", "apellido", "nombre"),
+        }
 
     def _get_selected_date(self):
         raw_fecha = self.request.GET.get("fecha", "").strip()

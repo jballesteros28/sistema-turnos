@@ -9,109 +9,119 @@
 <div class="dashboard" data-dashboard>
     <section class="page-header">
         <div>
-            <p class="eyebrow">Dashboard</p>
-            <h1>Resumen operativo</h1>
-        </div>
+        <p class="eyebrow">Dashboard</p>
+        <h1>Resumen operativo</h1>
+    </div>
+    {% if permisos_ui.puede_crear_turnos %}
         <a class="button" href="{% url 'turnos:crear' %}">Nuevo turno</a>
-    </section>
+    {% endif %}
+</section>
 
+{% if not usuario_sin_negocios %}
     {% if not hay_negocios %}
         <div class="notice">Todavia no hay negocios cargados.</div>
     {% endif %}
 
-    <section class="dashboard-section" aria-labelledby="resumen-general">
-        <h2 id="resumen-general">Resumen general</h2>
-        <div class="metric-grid">
-            {% for card in metric_cards %}
-                <a class="metric-card" href="{{ card.url }}">
-                    <span class="metric-label">{{ card.label }}</span>
-                    <strong class="metric-value">{{ card.value }}</strong>
-                </a>
-            {% endfor %}
-        </div>
-    </section>
-
-    <div class="dashboard-columns">
-        <section class="panel dashboard-panel" aria-labelledby="turnos-hoy">
-            <h2 id="turnos-hoy">Turnos de hoy</h2>
-            {% if turnos_hoy %}
-                <div class="table-wrap dashboard-table-wrap">
-                    <table class="dashboard-table">
-                        <thead>
-                            <tr>
-                                <th>Hora</th>
-                                <th>Cliente</th>
-                                <th>Profesional</th>
-                                <th>Servicio</th>
-                                <th>Estado</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for turno in turnos_hoy %}
-                                <tr>
-                                    <td>{{ turno.fecha_hora_inicio|date:"H:i" }}</td>
-                                    <td>{{ turno.cliente.nombre_visible }}</td>
-                                    <td>{{ turno.profesional.nombre_visible }}</td>
-                                    <td>{{ turno.servicio.nombre }}</td>
-                                    <td>
-                                        <span class="badge badge-{{ turno.estado }}">{{ turno.get_estado_display }}</span>
-                                    </td>
-                                    <td><a href="{% url 'turnos:detalle' turno.pk %}">Ver</a></td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <p class="empty dashboard-empty">No hay turnos para hoy.</p>
-            {% endif %}
+    {% if metric_cards %}
+        <section class="dashboard-section" aria-labelledby="resumen-general">
+            <h2 id="resumen-general">Resumen general</h2>
+            <div class="metric-grid">
+                {% for card in metric_cards %}
+                    <a class="metric-card" href="{{ card.url }}">
+                        <span class="metric-label">{{ card.label }}</span>
+                        <strong class="metric-value">{{ card.value }}</strong>
+                    </a>
+                {% endfor %}
+            </div>
         </section>
+    {% endif %}
 
-        <section class="panel dashboard-panel" aria-labelledby="proximos-turnos">
-            <h2 id="proximos-turnos">Proximos turnos</h2>
-            {% if proximos_turnos %}
-                <div class="table-wrap dashboard-table-wrap">
-                    <table class="dashboard-table">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Cliente</th>
-                                <th>Profesional</th>
-                                <th>Servicio</th>
-                                <th>Estado</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for turno in proximos_turnos %}
+    {% if permisos_ui.puede_ver_turnos %}
+        <div class="dashboard-columns">
+            <section class="panel dashboard-panel" aria-labelledby="turnos-hoy">
+                <h2 id="turnos-hoy">Turnos de hoy</h2>
+                {% if turnos_hoy %}
+                    <div class="table-wrap dashboard-table-wrap">
+                        <table class="dashboard-table">
+                            <thead>
                                 <tr>
-                                    <td>{{ turno.fecha_hora_inicio|date:"d/m/Y H:i" }}</td>
-                                    <td>{{ turno.cliente.nombre_visible }}</td>
-                                    <td>{{ turno.profesional.nombre_visible }}</td>
-                                    <td>{{ turno.servicio.nombre }}</td>
-                                    <td>
-                                        <span class="badge badge-{{ turno.estado }}">{{ turno.get_estado_display }}</span>
-                                    </td>
-                                    <td><a href="{% url 'turnos:detalle' turno.pk %}">Ver</a></td>
+                                    <th>Hora</th>
+                                    <th>Cliente</th>
+                                    <th>Profesional</th>
+                                    <th>Servicio</th>
+                                    <th>Estado</th>
+                                    <th></th>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-            <p class="empty dashboard-empty">No hay proximos turnos.</p>
-            {% endif %}
-        </section>
-    </div>
+                            </thead>
+                            <tbody>
+                                {% for turno in turnos_hoy %}
+                                    <tr>
+                                        <td>{{ turno.fecha_hora_inicio|date:"H:i" }}</td>
+                                        <td>{{ turno.cliente.nombre_visible }}</td>
+                                        <td>{{ turno.profesional.nombre_visible }}</td>
+                                        <td>{{ turno.servicio.nombre }}</td>
+                                        <td>
+                                            <span class="badge badge-{{ turno.estado }}">{{ turno.get_estado_display }}</span>
+                                        </td>
+                                        <td><a href="{% url 'turnos:detalle' turno.pk %}">Ver</a></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="empty dashboard-empty">No hay turnos para hoy.</p>
+                {% endif %}
+            </section>
 
-    <section class="panel dashboard-panel dashboard-actions-panel" aria-labelledby="accesos-rapidos">
-        <h2 id="accesos-rapidos">Accesos rapidos</h2>
-        <div class="dashboard-actions">
-            {% for action in quick_actions %}
-                <a class="button button-secondary" href="{{ action.url }}">{{ action.label }}</a>
-            {% endfor %}
+            <section class="panel dashboard-panel" aria-labelledby="proximos-turnos">
+                <h2 id="proximos-turnos">Proximos turnos</h2>
+                {% if proximos_turnos %}
+                    <div class="table-wrap dashboard-table-wrap">
+                        <table class="dashboard-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Cliente</th>
+                                    <th>Profesional</th>
+                                    <th>Servicio</th>
+                                    <th>Estado</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for turno in proximos_turnos %}
+                                    <tr>
+                                        <td>{{ turno.fecha_hora_inicio|date:"d/m/Y H:i" }}</td>
+                                        <td>{{ turno.cliente.nombre_visible }}</td>
+                                        <td>{{ turno.profesional.nombre_visible }}</td>
+                                        <td>{{ turno.servicio.nombre }}</td>
+                                        <td>
+                                            <span class="badge badge-{{ turno.estado }}">{{ turno.get_estado_display }}</span>
+                                        </td>
+                                        <td><a href="{% url 'turnos:detalle' turno.pk %}">Ver</a></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="empty dashboard-empty">No hay proximos turnos.</p>
+                {% endif %}
+            </section>
         </div>
-    </section>
+    {% endif %}
+
+    {% if quick_actions %}
+        <section class="panel dashboard-panel dashboard-actions-panel" aria-labelledby="accesos-rapidos">
+            <h2 id="accesos-rapidos">Accesos rapidos</h2>
+            <div class="dashboard-actions">
+                {% for action in quick_actions %}
+                    <a class="button button-secondary" href="{{ action.url }}">{{ action.label }}</a>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+{% endif %}
 </div>
 {% endblock %}

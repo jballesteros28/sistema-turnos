@@ -16,28 +16,36 @@
     </div>
     <div class="actions">
         <a class="button button-secondary" href="{% url 'sucursales:lista' %}">Volver</a>
-        <a class="button" href="{% url 'sucursales:editar' sucursal.pk %}">Editar</a>
-        {% if sucursal.estado == "activa" %}
-            <a class="button button-danger" href="{% url 'sucursales:desactivar' sucursal.pk %}">Desactivar</a>
-        {% else %}
-            <form method="post" action="{% url 'sucursales:activar' sucursal.pk %}">
-                {% csrf_token %}
-                <button type="submit">Activar</button>
-            </form>
+        {% if permisos_ui.puede_gestionar_negocios %}
+            <a class="button" href="{% url 'sucursales:editar' sucursal.pk %}">Editar</a>
+            {% if sucursal.estado == "activa" %}
+                <a class="button button-danger" href="{% url 'sucursales:desactivar' sucursal.pk %}">Desactivar</a>
+            {% else %}
+                <form method="post" action="{% url 'sucursales:activar' sucursal.pk %}">
+                    {% csrf_token %}
+                    <button type="submit">Activar</button>
+                </form>
+            {% endif %}
         {% endif %}
     </div>
 </section>
 
+{% if permisos_ui.puede_gestionar_negocios or permisos_ui.puede_gestionar_operacion %}
 <section class="panel">
     <h2>Accesos rapidos</h2>
     <div class="quick-actions">
-        <a class="button" href="{% url 'servicios:crear' %}?negocio={{ sucursal.negocio_id }}">Crear servicio</a>
-        <a class="button" href="{% url 'profesionales:crear' %}?negocio={{ sucursal.negocio_id }}&sucursal={{ sucursal.pk }}">Crear profesional</a>
-        <a class="button button-secondary" href="{% url 'disponibilidades:crear' %}?negocio={{ sucursal.negocio_id }}&sucursal={{ sucursal.pk }}">Crear disponibilidad</a>
-        <a class="button button-secondary" href="{% url 'excepciones:crear' %}?negocio={{ sucursal.negocio_id }}&sucursal={{ sucursal.pk }}">Crear excepcion</a>
-        <a class="button button-secondary" href="{% url 'turnos:crear' %}?negocio={{ sucursal.negocio_id }}&sucursal={{ sucursal.pk }}">Crear turno</a>
+        {% if permisos_ui.puede_gestionar_negocios %}
+            <a class="button" href="{% url 'servicios:crear' %}?negocio={{ sucursal.negocio_id }}">Crear servicio</a>
+            <a class="button" href="{% url 'profesionales:crear' %}?negocio={{ sucursal.negocio_id }}&sucursal={{ sucursal.pk }}">Crear profesional</a>
+        {% endif %}
+        {% if permisos_ui.puede_gestionar_operacion %}
+            <a class="button button-secondary" href="{% url 'disponibilidades:crear' %}?negocio={{ sucursal.negocio_id }}&sucursal={{ sucursal.pk }}">Crear disponibilidad</a>
+            <a class="button button-secondary" href="{% url 'excepciones:crear' %}?negocio={{ sucursal.negocio_id }}&sucursal={{ sucursal.pk }}">Crear excepcion</a>
+            <a class="button button-secondary" href="{% url 'turnos:crear' %}?negocio={{ sucursal.negocio_id }}&sucursal={{ sucursal.pk }}">Crear turno</a>
+        {% endif %}
     </div>
 </section>
+{% endif %}
 
 <section class="panel">
     <h2>Datos de la sucursal</h2>

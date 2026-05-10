@@ -3,6 +3,8 @@ from django.core.exceptions import PermissionDenied
 
 from .permissions import (
     es_superadmin,
+    usuario_puede_gestionar_algun_negocio,
+    usuario_puede_gestionar_alguna_operacion,
     usuario_puede_gestionar_negocio,
     usuario_puede_gestionar_operacion,
 )
@@ -22,6 +24,20 @@ class LoginRequiredUserFormMixin(LoginRequiredMixin, UserFormKwargsMixin):
 class SuperadminRequiredMixin(LoginRequiredMixin):
     def dispatch(self, request, *args, **kwargs):
         if not es_superadmin(request.user):
+            raise PermissionDenied
+        return super().dispatch(request, *args, **kwargs)
+
+
+class GestionNegocioRequiredMixin(LoginRequiredMixin):
+    def dispatch(self, request, *args, **kwargs):
+        if not usuario_puede_gestionar_algun_negocio(request.user):
+            raise PermissionDenied
+        return super().dispatch(request, *args, **kwargs)
+
+
+class GestionOperacionRequiredMixin(LoginRequiredMixin):
+    def dispatch(self, request, *args, **kwargs):
+        if not usuario_puede_gestionar_alguna_operacion(request.user):
             raise PermissionDenied
         return super().dispatch(request, *args, **kwargs)
 

@@ -5,14 +5,14 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
-from negocio.models import Negocio
 from sistema_turnos.view_utils import get_query_initial
 from usuarios.mixins import (
     GestionOperacionFormRequiredMixin,
     GestionOperacionObjectRequiredMixin,
+    GestionOperacionRequiredMixin,
     LoginRequiredUserFormMixin,
 )
-from usuarios.permissions import filtrar_por_negocios_permitidos, get_negocios_permitidos
+from usuarios.permissions import filtrar_por_negocios_operacion, get_negocios_operacion
 
 from .forms import ClienteForm
 from .models import Cliente, EstadoCliente
@@ -23,7 +23,7 @@ class ClienteQuerySetMixin(LoginRequiredUserFormMixin):
 
     def get_queryset(self):
         queryset = Cliente.objects.select_related("negocio")
-        return filtrar_por_negocios_permitidos(queryset, self.request.user)
+        return filtrar_por_negocios_operacion(queryset, self.request.user)
 
 
 class ClienteListView(ClienteQuerySetMixin, ListView):
@@ -68,6 +68,7 @@ class ClienteDetailView(ClienteQuerySetMixin, DetailView):
 
 
 class ClienteCreateView(
+    GestionOperacionRequiredMixin,
     GestionOperacionFormRequiredMixin,
     ClienteQuerySetMixin,
     CreateView,
@@ -82,7 +83,7 @@ class ClienteCreateView(
         context = super().get_context_data(**kwargs)
         context["titulo"] = "Nuevo cliente"
         context["avisos_base"] = []
-        if not get_negocios_permitidos(self.request.user).exists():
+        if not get_negocios_operacion(self.request.user).exists():
             context["avisos_base"].append("Primero debes crear un negocio para continuar.")
         return context
 

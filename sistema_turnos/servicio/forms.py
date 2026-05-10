@@ -42,7 +42,7 @@ class ServicioForm(forms.ModelForm):
         self.user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
         self.label_suffix = ""
-        limitar_querysets_por_usuario(self, self.user)
+        limitar_querysets_por_usuario(self, self.user, gestion_negocio=True)
 
         for field in self.fields.values():
             if isinstance(field.widget, forms.CheckboxInput):

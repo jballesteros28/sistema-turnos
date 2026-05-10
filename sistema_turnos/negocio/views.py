@@ -10,7 +10,7 @@ from usuarios.mixins import (
     LoginRequiredUserFormMixin,
     SuperadminRequiredMixin,
 )
-from usuarios.permissions import get_negocios_permitidos
+from usuarios.permissions import get_negocios_visibles
 
 from .forms import NegocioForm
 from .models import EstadoNegocio, Negocio, TipoNegocio
@@ -20,7 +20,7 @@ class NegocioQuerySetMixin(LoginRequiredUserFormMixin):
     model = Negocio
 
     def get_queryset(self):
-        return get_negocios_permitidos(self.request.user)
+        return get_negocios_visibles(self.request.user)
 
 
 class NegocioListView(NegocioQuerySetMixin, ListView):

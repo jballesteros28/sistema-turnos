@@ -5,16 +5,16 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
-from negocio.models import Negocio
 from profesional.models import Profesional
 from sistema_turnos.view_utils import get_query_id, get_query_initial
 from sucursal.models import Sucursal
 from usuarios.mixins import (
     GestionOperacionFormRequiredMixin,
     GestionOperacionObjectRequiredMixin,
+    GestionOperacionRequiredMixin,
     LoginRequiredUserFormMixin,
 )
-from usuarios.permissions import filtrar_por_negocios_permitidos, get_negocios_permitidos
+from usuarios.permissions import filtrar_por_negocios_operacion, get_negocios_operacion
 
 from .forms import DisponibilidadForm
 from .models import DiaSemana, Disponibilidad
@@ -35,7 +35,7 @@ class DisponibilidadQuerySetMixin(LoginRequiredUserFormMixin):
             "sucursal",
             "profesional",
         )
-        return filtrar_por_negocios_permitidos(queryset, self.request.user)
+        return filtrar_por_negocios_operacion(queryset, self.request.user)
 
 
 class DisponibilidadListView(DisponibilidadQuerySetMixin, ListView):
@@ -89,15 +89,15 @@ class DisponibilidadListView(DisponibilidadQuerySetMixin, ListView):
         context["profesional_actual"] = self.profesional_id
         context["dia_actual"] = self.dia_semana
         context["estado_actual"] = self.estado
-        context["negocios"] = get_negocios_permitidos(self.request.user).order_by("nombre")
-        context["sucursales"] = filtrar_por_negocios_permitidos(
+        context["negocios"] = get_negocios_operacion(self.request.user).order_by("nombre")
+        context["sucursales"] = filtrar_por_negocios_operacion(
             Sucursal.objects.select_related("negocio"),
             self.request.user,
         ).order_by(
             "negocio__nombre",
             "nombre",
         )
-        context["profesionales"] = filtrar_por_negocios_permitidos(
+        context["profesionales"] = filtrar_por_negocios_operacion(
             Profesional.objects.select_related("negocio"),
             self.request.user,
         ).order_by(
@@ -116,6 +116,7 @@ class DisponibilidadDetailView(DisponibilidadQuerySetMixin, DetailView):
 
 
 class DisponibilidadCreateView(
+    GestionOperacionRequiredMixin,
     GestionOperacionFormRequiredMixin,
     DisponibilidadQuerySetMixin,
     CreateView,
@@ -136,24 +137,30 @@ class DisponibilidadCreateView(
         avisos = []
         negocio_id = get_query_id(self.request, "negocio")
 
-        if not get_negocios_permitidos(self.request.user).exists():
+        if not get_negocios_operacion(self.request.user).exists():
             return ["Primero debes crear un negocio para continuar."]
 
         if negocio_id:
-            if not filtrar_por_negocios_permitidos(
+            if not filtrar_por_negocios_operacion(
                 Sucursal.objects.filter(negocio_id=negocio_id),
                 self.request.user,
             ).exists():
                 avisos.append("Primero debes crear una sucursal para este negocio.")
-            if not filtrar_por_negocios_permitidos(
+            if not filtrar_por_negocios_operacion(
                 Profesional.objects.filter(negocio_id=negocio_id),
                 self.request.user,
             ).exists():
                 avisos.append("Primero debes crear un profesional para este negocio.")
         else:
-            if not filtrar_por_negocios_permitidos(Sucursal.objects, self.request.user).exists():
+            if not filtrar_por_negocios_operacion(
+                Sucursal.objects,
+                self.request.user,
+            ).exists():
                 avisos.append("Primero debes crear una sucursal para continuar.")
-            if not filtrar_por_negocios_permitidos(Profesional.objects, self.request.user).exists():
+            if not filtrar_por_negocios_operacion(
+                Profesional.objects,
+                self.request.user,
+            ).exists():
                 avisos.append("Primero debes crear un profesional para continuar.")
 
         return avisos

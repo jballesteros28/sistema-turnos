@@ -11,7 +11,9 @@
         <p class="eyebrow">Clientes</p>
         <h1>Clientes</h1>
     </div>
-    <a class="button" href="{% url 'clientes:crear' %}">Nuevo cliente</a>
+    {% if permisos_ui.puede_gestionar_operacion %}
+        <a class="button" href="{% url 'clientes:crear' %}">Nuevo cliente</a>
+    {% endif %}
 </section>
 
 <form class="toolbar toolbar-clientes" method="get">
@@ -71,7 +73,9 @@
                     <td>
                         <div class="actions">
                             <a href="{% url 'clientes:detalle' cliente.pk %}">Ver</a>
-                            <a href="{% url 'clientes:editar' cliente.pk %}">Editar</a>
+                            {% if permisos_ui.puede_gestionar_operacion %}
+                                <a href="{% url 'clientes:editar' cliente.pk %}">Editar</a>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>

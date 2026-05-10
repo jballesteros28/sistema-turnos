@@ -16,14 +16,16 @@
     </div>
     <div class="actions">
         <a class="button button-secondary" href="{% url 'servicios:lista' %}">Volver</a>
-        <a class="button" href="{% url 'servicios:editar' servicio.pk %}">Editar</a>
-        {% if servicio.estado == "activo" %}
-            <a class="button button-danger" href="{% url 'servicios:desactivar' servicio.pk %}">Desactivar</a>
-        {% elif servicio.estado == "inactivo" %}
-            <form method="post" action="{% url 'servicios:activar' servicio.pk %}">
-                {% csrf_token %}
-                <button type="submit">Activar</button>
-            </form>
+        {% if permisos_ui.puede_gestionar_negocios %}
+            <a class="button" href="{% url 'servicios:editar' servicio.pk %}">Editar</a>
+            {% if servicio.estado == "activo" %}
+                <a class="button button-danger" href="{% url 'servicios:desactivar' servicio.pk %}">Desactivar</a>
+            {% elif servicio.estado == "inactivo" %}
+                <form method="post" action="{% url 'servicios:activar' servicio.pk %}">
+                    {% csrf_token %}
+                    <button type="submit">Activar</button>
+                </form>
+            {% endif %}
         {% endif %}
     </div>
 </section>

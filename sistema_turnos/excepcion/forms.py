@@ -51,7 +51,7 @@ class ExcepcionAgendaForm(forms.ModelForm):
         self.user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
         self.label_suffix = ""
-        limitar_querysets_por_usuario(self, self.user)
+        limitar_querysets_por_usuario(self, self.user, gestion_operacion=True)
         self.fields["fecha_hora_inicio"].input_formats = ["%Y-%m-%dT%H:%M"]
         self.fields["fecha_hora_fin"].input_formats = ["%Y-%m-%dT%H:%M"]
 

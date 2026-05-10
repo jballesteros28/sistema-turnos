@@ -11,7 +11,9 @@
         <p class="eyebrow">Sucursales</p>
         <h1>Sucursales</h1>
     </div>
-    <a class="button" href="{% url 'sucursales:crear' %}">Nueva sucursal</a>
+    {% if permisos_ui.puede_gestionar_negocios %}
+        <a class="button" href="{% url 'sucursales:crear' %}">Nueva sucursal</a>
+    {% endif %}
 </section>
 
 <form class="toolbar toolbar-sucursales" method="get">
@@ -75,7 +77,9 @@
                     <td>
                         <div class="actions">
                             <a href="{% url 'sucursales:detalle' sucursal.pk %}">Ver</a>
-                            <a href="{% url 'sucursales:editar' sucursal.pk %}">Editar</a>
+                            {% if permisos_ui.puede_gestionar_negocios %}
+                                <a href="{% url 'sucursales:editar' sucursal.pk %}">Editar</a>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>

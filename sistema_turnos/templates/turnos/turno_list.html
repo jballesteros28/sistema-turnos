@@ -11,7 +11,9 @@
         <p class="eyebrow">Turnos</p>
         <h1>Turnos</h1>
     </div>
-    <a class="button" href="{% url 'turnos:crear' %}">Nuevo turno</a>
+    {% if permisos_ui.puede_crear_turnos %}
+        <a class="button" href="{% url 'turnos:crear' %}">Nuevo turno</a>
+    {% endif %}
 </section>
 
 <form class="toolbar toolbar-turnos" method="get">
@@ -91,7 +93,9 @@
                     <td>
                         <div class="actions">
                             <a href="{% url 'turnos:detalle' turno.pk %}">Ver</a>
-                            <a href="{% url 'turnos:editar' turno.pk %}">Editar</a>
+                            {% if permisos_ui.puede_gestionar_operacion %}
+                                <a href="{% url 'turnos:editar' turno.pk %}">Editar</a>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>

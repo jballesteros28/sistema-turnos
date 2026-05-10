@@ -11,7 +11,9 @@
         <p class="eyebrow">Profesionales</p>
         <h1>Profesionales</h1>
     </div>
-    <a class="button" href="{% url 'profesionales:crear' %}">Nuevo profesional</a>
+    {% if permisos_ui.puede_gestionar_negocios %}
+        <a class="button" href="{% url 'profesionales:crear' %}">Nuevo profesional</a>
+    {% endif %}
 </section>
 
 <form class="toolbar toolbar-profesionales" method="get">
@@ -89,7 +91,9 @@
                     <td>
                         <div class="actions">
                             <a href="{% url 'profesionales:detalle' profesional.pk %}">Ver</a>
-                            <a href="{% url 'profesionales:editar' profesional.pk %}">Editar</a>
+                            {% if permisos_ui.puede_gestionar_negocios %}
+                                <a href="{% url 'profesionales:editar' profesional.pk %}">Editar</a>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>

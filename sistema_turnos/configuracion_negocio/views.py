@@ -4,14 +4,14 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
-from negocio.models import Negocio
 from sistema_turnos.view_utils import get_query_initial
 from usuarios.mixins import (
     GestionNegocioFormRequiredMixin,
     GestionNegocioObjectRequiredMixin,
+    GestionNegocioRequiredMixin,
     LoginRequiredUserFormMixin,
 )
-from usuarios.permissions import filtrar_por_negocios_permitidos, get_negocios_permitidos
+from usuarios.permissions import filtrar_por_negocios_gestionables, get_negocios_gestionables
 
 from .forms import ConfiguracionNegocioForm
 from .models import ConfiguracionNegocio
@@ -22,10 +22,14 @@ class ConfiguracionNegocioQuerySetMixin(LoginRequiredUserFormMixin):
 
     def get_queryset(self):
         queryset = ConfiguracionNegocio.objects.select_related("negocio")
-        return filtrar_por_negocios_permitidos(queryset, self.request.user)
+        return filtrar_por_negocios_gestionables(queryset, self.request.user)
 
 
-class ConfiguracionNegocioListView(ConfiguracionNegocioQuerySetMixin, ListView):
+class ConfiguracionNegocioListView(
+    GestionNegocioRequiredMixin,
+    ConfiguracionNegocioQuerySetMixin,
+    ListView,
+):
     template_name = "configuracion/configuracion_list.html"
     context_object_name = "configuraciones"
     paginate_by = 20
@@ -51,16 +55,21 @@ class ConfiguracionNegocioListView(ConfiguracionNegocioQuerySetMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["query"] = self.query
         context["negocio_actual"] = self.negocio_id
-        context["negocios"] = get_negocios_permitidos(self.request.user).order_by("nombre")
+        context["negocios"] = get_negocios_gestionables(self.request.user).order_by("nombre")
         return context
 
 
-class ConfiguracionNegocioDetailView(ConfiguracionNegocioQuerySetMixin, DetailView):
+class ConfiguracionNegocioDetailView(
+    GestionNegocioRequiredMixin,
+    ConfiguracionNegocioQuerySetMixin,
+    DetailView,
+):
     template_name = "configuracion/configuracion_detail.html"
     context_object_name = "configuracion"
 
 
 class ConfiguracionNegocioCreateView(
+    GestionNegocioRequiredMixin,
     GestionNegocioFormRequiredMixin,
     ConfiguracionNegocioQuerySetMixin,
     CreateView,
@@ -83,7 +92,7 @@ class ConfiguracionNegocioCreateView(
         context = super().get_context_data(**kwargs)
         context["titulo"] = "Nueva configuracion"
         context["avisos_base"] = []
-        if not get_negocios_permitidos(self.request.user).exists():
+        if not get_negocios_gestionables(self.request.user).exists():
             context["avisos_base"].append("Primero debes crear un negocio para continuar.")
         return context
 
@@ -97,6 +106,7 @@ class ConfiguracionNegocioCreateView(
 
 
 class ConfiguracionNegocioUpdateView(
+    GestionNegocioRequiredMixin,
     GestionNegocioObjectRequiredMixin,
     ConfiguracionNegocioQuerySetMixin,
     UpdateView,

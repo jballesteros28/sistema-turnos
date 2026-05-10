@@ -11,7 +11,9 @@
         <p class="eyebrow">Configuracion</p>
         <h1>Configuraciones de negocio</h1>
     </div>
-    <a class="button" href="{% url 'configuracion_negocio:crear' %}">Nueva configuracion</a>
+    {% if permisos_ui.puede_gestionar_configuracion %}
+        <a class="button" href="{% url 'configuracion_negocio:crear' %}">Nueva configuracion</a>
+    {% endif %}
 </section>
 
 <form class="toolbar toolbar-configuracion" method="get">
@@ -64,7 +66,9 @@
                     <td>
                         <div class="actions">
                             <a href="{% url 'configuracion_negocio:detalle' configuracion.pk %}">Ver</a>
-                            <a href="{% url 'configuracion_negocio:editar' configuracion.pk %}">Editar</a>
+                            {% if permisos_ui.puede_gestionar_configuracion %}
+                                <a href="{% url 'configuracion_negocio:editar' configuracion.pk %}">Editar</a>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>

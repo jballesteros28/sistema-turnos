@@ -16,36 +16,48 @@
     </div>
     <div class="actions">
         <a class="button button-secondary" href="{% url 'negocios:lista' %}">Volver</a>
-        <a class="button" href="{% url 'negocios:editar' negocio.pk %}">Editar</a>
-        {% if negocio.estado == "activo" %}
-            <a class="button button-danger" href="{% url 'negocios:desactivar' negocio.pk %}">Desactivar</a>
-        {% else %}
-            <form method="post" action="{% url 'negocios:activar' negocio.pk %}">
-                {% csrf_token %}
-                <button type="submit">Activar</button>
-            </form>
+        {% if permisos_ui.puede_gestionar_negocios %}
+            <a class="button" href="{% url 'negocios:editar' negocio.pk %}">Editar</a>
+            {% if negocio.estado == "activo" %}
+                <a class="button button-danger" href="{% url 'negocios:desactivar' negocio.pk %}">Desactivar</a>
+            {% else %}
+                <form method="post" action="{% url 'negocios:activar' negocio.pk %}">
+                    {% csrf_token %}
+                    <button type="submit">Activar</button>
+                </form>
+            {% endif %}
         {% endif %}
     </div>
 </section>
 
+{% if permisos_ui.puede_gestionar_negocios or permisos_ui.puede_gestionar_operacion or permisos_ui.puede_ver_configuracion %}
 <section class="panel">
     <h2>Accesos rapidos</h2>
     <div class="quick-actions">
-        <a class="button" href="{% url 'sucursales:crear' %}?negocio={{ negocio.pk }}">Crear sucursal</a>
-        <a class="button" href="{% url 'servicios:crear' %}?negocio={{ negocio.pk }}">Crear servicio</a>
-        <a class="button" href="{% url 'profesionales:crear' %}?negocio={{ negocio.pk }}">Crear profesional</a>
-        <a class="button" href="{% url 'clientes:crear' %}?negocio={{ negocio.pk }}">Crear cliente</a>
-        <a class="button button-secondary" href="{% url 'disponibilidades:crear' %}?negocio={{ negocio.pk }}">Crear disponibilidad</a>
-        <a class="button button-secondary" href="{% url 'excepciones:crear' %}?negocio={{ negocio.pk }}">Crear excepcion</a>
-        <a class="button button-secondary" href="{% url 'turnos:crear' %}?negocio={{ negocio.pk }}">Crear turno</a>
-        {% if configuracion %}
-            <a class="button button-secondary" href="{% url 'configuracion_negocio:detalle' configuracion.pk %}">Ver configuracion</a>
-            <a class="button button-secondary" href="{% url 'configuracion_negocio:editar' configuracion.pk %}">Editar configuracion</a>
-        {% else %}
-            <a class="button button-secondary" href="{% url 'configuracion_negocio:crear' %}?negocio={{ negocio.pk }}">Crear configuracion</a>
+        {% if permisos_ui.puede_gestionar_negocios %}
+            <a class="button" href="{% url 'sucursales:crear' %}?negocio={{ negocio.pk }}">Crear sucursal</a>
+            <a class="button" href="{% url 'servicios:crear' %}?negocio={{ negocio.pk }}">Crear servicio</a>
+            <a class="button" href="{% url 'profesionales:crear' %}?negocio={{ negocio.pk }}">Crear profesional</a>
+        {% endif %}
+        {% if permisos_ui.puede_gestionar_operacion %}
+            <a class="button" href="{% url 'clientes:crear' %}?negocio={{ negocio.pk }}">Crear cliente</a>
+            <a class="button button-secondary" href="{% url 'disponibilidades:crear' %}?negocio={{ negocio.pk }}">Crear disponibilidad</a>
+            <a class="button button-secondary" href="{% url 'excepciones:crear' %}?negocio={{ negocio.pk }}">Crear excepcion</a>
+            <a class="button button-secondary" href="{% url 'turnos:crear' %}?negocio={{ negocio.pk }}">Crear turno</a>
+        {% endif %}
+        {% if permisos_ui.puede_ver_configuracion %}
+            {% if configuracion %}
+                <a class="button button-secondary" href="{% url 'configuracion_negocio:detalle' configuracion.pk %}">Ver configuracion</a>
+                {% if permisos_ui.puede_gestionar_configuracion %}
+                    <a class="button button-secondary" href="{% url 'configuracion_negocio:editar' configuracion.pk %}">Editar configuracion</a>
+                {% endif %}
+            {% else %}
+                <a class="button button-secondary" href="{% url 'configuracion_negocio:crear' %}?negocio={{ negocio.pk }}">Crear configuracion</a>
+            {% endif %}
         {% endif %}
     </div>
 </section>
+{% endif %}
 
 <section class="panel">
     <h2>Datos del negocio</h2>

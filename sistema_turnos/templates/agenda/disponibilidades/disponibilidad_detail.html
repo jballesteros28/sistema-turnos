@@ -20,14 +20,16 @@
     </div>
     <div class="actions">
         <a class="button button-secondary" href="{% url 'disponibilidades:lista' %}">Volver</a>
-        <a class="button" href="{% url 'disponibilidades:editar' disponibilidad.pk %}">Editar</a>
-        {% if disponibilidad.activo %}
-            <a class="button button-danger" href="{% url 'disponibilidades:desactivar' disponibilidad.pk %}">Desactivar</a>
-        {% else %}
-            <form method="post" action="{% url 'disponibilidades:activar' disponibilidad.pk %}">
-                {% csrf_token %}
-                <button type="submit">Activar</button>
-            </form>
+        {% if permisos_ui.puede_gestionar_operacion %}
+            <a class="button" href="{% url 'disponibilidades:editar' disponibilidad.pk %}">Editar</a>
+            {% if disponibilidad.activo %}
+                <a class="button button-danger" href="{% url 'disponibilidades:desactivar' disponibilidad.pk %}">Desactivar</a>
+            {% else %}
+                <form method="post" action="{% url 'disponibilidades:activar' disponibilidad.pk %}">
+                    {% csrf_token %}
+                    <button type="submit">Activar</button>
+                </form>
+            {% endif %}
         {% endif %}
     </div>
 </section>
