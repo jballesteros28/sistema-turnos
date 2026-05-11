@@ -11,7 +11,10 @@
         <p class="eyebrow">Turnos</p>
         <h1>{{ titulo }}</h1>
     </div>
-    <a class="button button-secondary" href="{% if turno %}{% url 'turnos:detalle' turno.pk %}{% else %}{% url 'turnos:lista' %}{% endif %}">Cancelar</a>
+    <a class="button button-secondary" href="{% if turno %}{% url 'turnos:detalle' turno.pk %}{% else %}{% url 'turnos:lista' %}{% endif %}">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        <span>Cancelar</span>
+    </a>
 </section>
 
 {% if avisos_base %}
@@ -47,8 +50,8 @@
     </div>
 
     <div class="form-actions">
-        <button type="submit">Guardar</button>
-        <a class="button button-secondary" href="{% if turno %}{% url 'turnos:detalle' turno.pk %}{% else %}{% url 'turnos:lista' %}{% endif %}">Cancelar</a>
+        <button type="submit"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Guardar</button>
+        <a class="button button-secondary" href="{% if turno %}{% url 'turnos:detalle' turno.pk %}{% else %}{% url 'turnos:lista' %}{% endif %}"><i class="fa-solid fa-xmark" aria-hidden="true"></i> Cancelar</a>
     </div>
 </form>
 {% endblock %}

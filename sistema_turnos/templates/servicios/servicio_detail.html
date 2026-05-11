@@ -15,15 +15,15 @@
         </div>
     </div>
     <div class="actions">
-        <a class="button button-secondary" href="{% url 'servicios:lista' %}">Volver</a>
+        <a class="button button-secondary" href="{% url 'servicios:lista' %}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Volver</a>
         {% if permisos_ui.puede_gestionar_negocios %}
-            <a class="button" href="{% url 'servicios:editar' servicio.pk %}">Editar</a>
+            <a class="button" href="{% url 'servicios:editar' servicio.pk %}"><i class="fa-regular fa-pen-to-square" aria-hidden="true"></i> Editar</a>
             {% if servicio.estado == "activo" %}
-                <a class="button button-danger" href="{% url 'servicios:desactivar' servicio.pk %}">Desactivar</a>
+                <a class="button button-danger" href="{% url 'servicios:desactivar' servicio.pk %}"><i class="fa-solid fa-ban" aria-hidden="true"></i> Desactivar</a>
             {% elif servicio.estado == "inactivo" %}
                 <form method="post" action="{% url 'servicios:activar' servicio.pk %}">
                     {% csrf_token %}
-                    <button type="submit">Activar</button>
+                    <button type="submit"><i class="fa-solid fa-check" aria-hidden="true"></i> Activar</button>
                 </form>
             {% endif %}
         {% endif %}

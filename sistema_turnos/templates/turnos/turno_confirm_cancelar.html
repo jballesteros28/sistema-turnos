@@ -11,7 +11,7 @@
         <p class="eyebrow">Turnos</p>
         <h1>Cancelar turno</h1>
     </div>
-    <a class="button button-secondary" href="{% url 'turnos:detalle' turno.pk %}">Volver</a>
+    <a class="button button-secondary" href="{% url 'turnos:detalle' turno.pk %}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Volver</a>
 </section>
 
 <section class="panel">
@@ -25,8 +25,8 @@
             <textarea class="input" id="motivo_cancelacion" name="motivo_cancelacion" rows="4">{{ turno.motivo_cancelacion }}</textarea>
         </div>
         <div class="form-actions">
-            <button class="button-danger" type="submit">Cancelar turno</button>
-            <a class="button button-secondary" href="{% url 'turnos:detalle' turno.pk %}">Volver</a>
+            <button class="button-danger" type="submit"><i class="fa-solid fa-ban" aria-hidden="true"></i> Cancelar turno</button>
+            <a class="button button-secondary" href="{% url 'turnos:detalle' turno.pk %}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Volver</a>
         </div>
     </form>
 </section>

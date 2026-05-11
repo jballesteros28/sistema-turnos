@@ -11,7 +11,7 @@
         <p class="eyebrow">Sucursales</p>
         <h1>{{ titulo }}</h1>
     </div>
-    <a class="button button-secondary" href="{% if sucursal %}{% url 'sucursales:detalle' sucursal.pk %}{% else %}{% url 'sucursales:lista' %}{% endif %}">Cancelar</a>
+    <a class="button button-secondary" href="{% if sucursal %}{% url 'sucursales:detalle' sucursal.pk %}{% else %}{% url 'sucursales:lista' %}{% endif %}"><i class="fa-solid fa-xmark" aria-hidden="true"></i> Cancelar</a>
 </section>
 
 {% if avisos_base %}
@@ -54,8 +54,8 @@
     </div>
 
     <div class="form-actions">
-        <button type="submit">Guardar</button>
-        <a class="button button-secondary" href="{% if sucursal %}{% url 'sucursales:detalle' sucursal.pk %}{% else %}{% url 'sucursales:lista' %}{% endif %}">Cancelar</a>
+        <button type="submit"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Guardar</button>
+        <a class="button button-secondary" href="{% if sucursal %}{% url 'sucursales:detalle' sucursal.pk %}{% else %}{% url 'sucursales:lista' %}{% endif %}"><i class="fa-solid fa-xmark" aria-hidden="true"></i> Cancelar</a>
     </div>
 </form>
 {% endblock %}

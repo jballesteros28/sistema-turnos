@@ -3,32 +3,60 @@
 }
 
 .turno-horario {
-    font-weight: 700;
+    color: var(--color-base);
+    font-weight: 800;
 }
 
-.badge-solicitado {
-    background: #fef3c7;
-    color: #92400e;
+.turno-detail-panel {
+    position: relative;
+    overflow: hidden;
 }
 
-.badge-confirmado {
-    background: #dbeafe;
-    color: #1d4ed8;
+.turno-detail-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 3px;
+    background: var(--color-primary);
 }
 
-.badge-cancelado {
-    background: #fee2e2;
-    color: #991b1b;
+.turno-detail-panel h2 {
+    margin-top: 4px;
 }
 
-.badge-completado {
-    background: #dcfce7;
-    color: #166534;
+.turno-detail-panel .detail-grid {
+    margin-top: 2px;
 }
 
-.badge-ausente {
-    background: #f3f4f6;
-    color: #4b5563;
+.turno-primary-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.turno-fact {
+    min-width: 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    background: #fbfdff;
+}
+
+.turno-fact span {
+    display: block;
+    color: var(--color-muted);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.turno-fact strong {
+    display: block;
+    margin-top: 5px;
+    color: var(--color-base);
+    font-size: 16px;
+    overflow-wrap: anywhere;
 }
 
 @media (max-width: 768px) {

@@ -8,12 +8,15 @@
 {% block content %}
 <div class="dashboard" data-dashboard>
     <section class="page-header">
-        <div>
+    <div>
         <p class="eyebrow">Dashboard</p>
         <h1>Resumen operativo</h1>
     </div>
     {% if permisos_ui.puede_crear_turnos %}
-        <a class="button" href="{% url 'turnos:crear' %}">Nuevo turno</a>
+        <a class="button" href="{% url 'turnos:crear' %}">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i>
+            <span>Nuevo turno</span>
+        </a>
     {% endif %}
 </section>
 
@@ -24,11 +27,16 @@
 
     {% if metric_cards %}
         <section class="dashboard-section" aria-labelledby="resumen-general">
-            <h2 id="resumen-general">Resumen general</h2>
+            <div class="dashboard-section-header">
+                <h2 id="resumen-general">Resumen general</h2>
+            </div>
             <div class="metric-grid">
                 {% for card in metric_cards %}
                     <a class="metric-card" href="{{ card.url }}">
-                        <span class="metric-label">{{ card.label }}</span>
+                        <span class="metric-card-top">
+                            <span class="metric-label">{{ card.label }}</span>
+                            <span class="metric-icon"><i class="fa-solid fa-chart-column" aria-hidden="true"></i></span>
+                        </span>
                         <strong class="metric-value">{{ card.value }}</strong>
                     </a>
                 {% endfor %}
@@ -39,7 +47,10 @@
     {% if permisos_ui.puede_ver_turnos %}
         <div class="dashboard-columns">
             <section class="panel dashboard-panel" aria-labelledby="turnos-hoy">
-                <h2 id="turnos-hoy">Turnos de hoy</h2>
+                <h2 class="dashboard-panel-title" id="turnos-hoy">
+                    <span class="dashboard-panel-icon"><i class="fa-regular fa-calendar-check" aria-hidden="true"></i></span>
+                    <span>Turnos de hoy</span>
+                </h2>
                 {% if turnos_hoy %}
                     <div class="table-wrap dashboard-table-wrap">
                         <table class="dashboard-table">
@@ -56,14 +67,14 @@
                             <tbody>
                                 {% for turno in turnos_hoy %}
                                     <tr>
-                                        <td>{{ turno.fecha_hora_inicio|date:"H:i" }}</td>
+                                        <td class="dashboard-time">{{ turno.fecha_hora_inicio|date:"H:i" }}</td>
                                         <td>{{ turno.cliente.nombre_visible }}</td>
                                         <td>{{ turno.profesional.nombre_visible }}</td>
                                         <td>{{ turno.servicio.nombre }}</td>
                                         <td>
                                             <span class="badge badge-{{ turno.estado }}">{{ turno.get_estado_display }}</span>
                                         </td>
-                                        <td><a href="{% url 'turnos:detalle' turno.pk %}">Ver</a></td>
+                                        <td><a href="{% url 'turnos:detalle' turno.pk %}"><i class="fa-regular fa-eye" aria-hidden="true"></i> Ver</a></td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -75,7 +86,10 @@
             </section>
 
             <section class="panel dashboard-panel" aria-labelledby="proximos-turnos">
-                <h2 id="proximos-turnos">Proximos turnos</h2>
+                <h2 class="dashboard-panel-title" id="proximos-turnos">
+                    <span class="dashboard-panel-icon"><i class="fa-solid fa-clock" aria-hidden="true"></i></span>
+                    <span>Proximos turnos</span>
+                </h2>
                 {% if proximos_turnos %}
                     <div class="table-wrap dashboard-table-wrap">
                         <table class="dashboard-table">
@@ -99,7 +113,7 @@
                                         <td>
                                             <span class="badge badge-{{ turno.estado }}">{{ turno.get_estado_display }}</span>
                                         </td>
-                                        <td><a href="{% url 'turnos:detalle' turno.pk %}">Ver</a></td>
+                                        <td><a href="{% url 'turnos:detalle' turno.pk %}"><i class="fa-regular fa-eye" aria-hidden="true"></i> Ver</a></td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -114,10 +128,16 @@
 
     {% if quick_actions %}
         <section class="panel dashboard-panel dashboard-actions-panel" aria-labelledby="accesos-rapidos">
-            <h2 id="accesos-rapidos">Accesos rapidos</h2>
+            <h2 class="dashboard-panel-title" id="accesos-rapidos">
+                <span class="dashboard-panel-icon"><i class="fa-solid fa-bolt" aria-hidden="true"></i></span>
+                <span>Accesos rapidos</span>
+            </h2>
             <div class="dashboard-actions">
                 {% for action in quick_actions %}
-                    <a class="button button-secondary" href="{{ action.url }}">{{ action.label }}</a>
+                    <a class="button button-secondary" href="{{ action.url }}">
+                        <span class="quick-action-icon"><i class="fa-solid fa-plus" aria-hidden="true"></i></span>
+                        <span>{{ action.label }}</span>
+                    </a>
                 {% endfor %}
             </div>
         </section>

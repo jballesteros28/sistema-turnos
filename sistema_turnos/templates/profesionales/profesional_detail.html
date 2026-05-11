@@ -15,15 +15,15 @@
         </div>
     </div>
     <div class="actions">
-        <a class="button button-secondary" href="{% url 'profesionales:lista' %}">Volver</a>
+        <a class="button button-secondary" href="{% url 'profesionales:lista' %}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Volver</a>
         {% if permisos_ui.puede_gestionar_negocios %}
-            <a class="button" href="{% url 'profesionales:editar' profesional.pk %}">Editar</a>
+            <a class="button" href="{% url 'profesionales:editar' profesional.pk %}"><i class="fa-regular fa-pen-to-square" aria-hidden="true"></i> Editar</a>
             {% if profesional.estado == "activo" %}
-                <a class="button button-danger" href="{% url 'profesionales:desactivar' profesional.pk %}">Desactivar</a>
+                <a class="button button-danger" href="{% url 'profesionales:desactivar' profesional.pk %}"><i class="fa-solid fa-ban" aria-hidden="true"></i> Desactivar</a>
             {% elif profesional.estado == "inactivo" %}
                 <form method="post" action="{% url 'profesionales:activar' profesional.pk %}">
                     {% csrf_token %}
-                    <button type="submit">Activar</button>
+                    <button type="submit"><i class="fa-solid fa-check" aria-hidden="true"></i> Activar</button>
                 </form>
             {% endif %}
         {% endif %}
@@ -34,9 +34,9 @@
 <section class="panel">
     <h2>Accesos rapidos</h2>
     <div class="quick-actions">
-        <a class="button" href="{% url 'disponibilidades:crear' %}?negocio={{ profesional.negocio_id }}&profesional={{ profesional.pk }}">Crear disponibilidad</a>
-        <a class="button button-secondary" href="{% url 'excepciones:crear' %}?negocio={{ profesional.negocio_id }}&profesional={{ profesional.pk }}">Crear excepcion</a>
-        <a class="button button-secondary" href="{% url 'turnos:crear' %}?negocio={{ profesional.negocio_id }}&profesional={{ profesional.pk }}">Crear turno</a>
+        <a class="button" href="{% url 'disponibilidades:crear' %}?negocio={{ profesional.negocio_id }}&profesional={{ profesional.pk }}"><i class="fa-solid fa-plus" aria-hidden="true"></i> Crear disponibilidad</a>
+        <a class="button button-secondary" href="{% url 'excepciones:crear' %}?negocio={{ profesional.negocio_id }}&profesional={{ profesional.pk }}"><i class="fa-solid fa-plus" aria-hidden="true"></i> Crear excepcion</a>
+        <a class="button button-secondary" href="{% url 'turnos:crear' %}?negocio={{ profesional.negocio_id }}&profesional={{ profesional.pk }}"><i class="fa-solid fa-plus" aria-hidden="true"></i> Crear turno</a>
     </div>
 </section>
 {% endif %}

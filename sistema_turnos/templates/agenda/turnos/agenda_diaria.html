@@ -13,7 +13,10 @@
         <div class="meta">Fecha seleccionada: {{ fecha_seleccionada|date:"d/m/Y" }}</div>
     </div>
     {% if permisos_ui.puede_crear_turnos %}
-        <a class="button" href="{% url 'turnos:crear' %}">Nuevo turno</a>
+        <a class="button" href="{% url 'turnos:crear' %}">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i>
+            <span>Nuevo turno</span>
+        </a>
     {% endif %}
 </section>
 
@@ -28,9 +31,9 @@
 {% endif %}
 
 <nav class="agenda-date-nav" aria-label="Navegacion de fecha">
-    <a class="button button-secondary" href="{{ dia_anterior_url }}">Dia anterior</a>
-    <a class="button button-secondary" href="{{ hoy_url }}">Hoy</a>
-    <a class="button button-secondary" href="{{ dia_siguiente_url }}">Dia siguiente</a>
+    <a class="button button-secondary" href="{{ dia_anterior_url }}"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i> Dia anterior</a>
+    <a class="button button-secondary" href="{{ hoy_url }}"><i class="fa-regular fa-calendar" aria-hidden="true"></i> Hoy</a>
+    <a class="button button-secondary" href="{{ dia_siguiente_url }}">Dia siguiente <i class="fa-solid fa-chevron-right" aria-hidden="true"></i></a>
 </nav>
 
 <form class="toolbar toolbar-agenda toolbar-agenda-turnos" method="get">
@@ -59,9 +62,9 @@
             <option value="{{ value }}" {% if value == estado_actual %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
     </select>
-    <button type="submit">Filtrar</button>
+    <button type="submit"><i class="fa-solid fa-filter" aria-hidden="true"></i> Filtrar</button>
     {% if fecha_actual or negocio_actual or sucursal_actual or profesional_actual or estado_actual %}
-        <a class="button button-secondary" href="{% url 'agenda:turnos' %}">Limpiar</a>
+        <a class="button button-secondary" href="{% url 'agenda:turnos' %}"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Limpiar</a>
     {% endif %}
 </form>
 
@@ -93,25 +96,25 @@
                     </td>
                     <td>
                         <div class="actions agenda-actions">
-                            <a href="{% url 'turnos:detalle' turno.pk %}">Ver</a>
+                            <a href="{% url 'turnos:detalle' turno.pk %}"><i class="fa-regular fa-eye" aria-hidden="true"></i> Ver</a>
                             {% if permisos_ui.puede_gestionar_operacion %}
-                                <a href="{% url 'turnos:editar' turno.pk %}">Editar</a>
+                                <a href="{% url 'turnos:editar' turno.pk %}"><i class="fa-regular fa-pen-to-square" aria-hidden="true"></i> Editar</a>
                                 {% if turno.estado == "solicitado" %}
                                     <form method="post" action="{% url 'turnos:confirmar' turno.pk %}">
                                         {% csrf_token %}
-                                        <button type="submit">Confirmar</button>
+                                        <button type="submit"><i class="fa-solid fa-check" aria-hidden="true"></i> Confirmar</button>
                                     </form>
                                 {% endif %}
                                 {% if turno.estado == "solicitado" or turno.estado == "confirmado" %}
                                     <form method="post" action="{% url 'turnos:completar' turno.pk %}">
                                         {% csrf_token %}
-                                        <button type="submit">Completar</button>
+                                        <button type="submit"><i class="fa-solid fa-check-double" aria-hidden="true"></i> Completar</button>
                                     </form>
                                     <form method="post" action="{% url 'turnos:ausente' turno.pk %}">
                                         {% csrf_token %}
-                                        <button class="button-secondary" type="submit">Ausente</button>
+                                        <button class="button-secondary" type="submit"><i class="fa-regular fa-circle" aria-hidden="true"></i> Ausente</button>
                                     </form>
-                                    <a class="button button-danger" href="{% url 'turnos:cancelar' turno.pk %}">Cancelar</a>
+                                    <a class="button button-danger" href="{% url 'turnos:cancelar' turno.pk %}"><i class="fa-solid fa-ban" aria-hidden="true"></i> Cancelar</a>
                                 {% endif %}
                             {% endif %}
                         </div>

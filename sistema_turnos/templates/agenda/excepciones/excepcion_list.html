@@ -12,7 +12,7 @@
         <h1>Excepciones</h1>
     </div>
     {% if permisos_ui.puede_gestionar_operacion %}
-        <a class="button" href="{% url 'excepciones:crear' %}">Nueva excepcion</a>
+        <a class="button" href="{% url 'excepciones:crear' %}"><i class="fa-solid fa-plus" aria-hidden="true"></i> Nueva excepcion</a>
     {% endif %}
 </section>
 
@@ -49,9 +49,9 @@
             <option value="{{ value }}" {% if value == estado_actual %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
     </select>
-    <button type="submit">Buscar</button>
+    <button type="submit"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Buscar</button>
     {% if query or negocio_actual or sucursal_actual or profesional_actual or tipo_actual or fecha_actual or estado_actual %}
-        <a class="button button-secondary" href="{% url 'excepciones:lista' %}">Limpiar</a>
+        <a class="button button-secondary" href="{% url 'excepciones:lista' %}"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Limpiar</a>
     {% endif %}
 </form>
 
@@ -102,9 +102,9 @@
                     </td>
                     <td>
                         <div class="actions">
-                            <a href="{% url 'excepciones:detalle' excepcion.pk %}">Ver</a>
+                            <a href="{% url 'excepciones:detalle' excepcion.pk %}"><i class="fa-regular fa-eye" aria-hidden="true"></i> Ver</a>
                             {% if permisos_ui.puede_gestionar_operacion %}
-                                <a href="{% url 'excepciones:editar' excepcion.pk %}">Editar</a>
+                                <a href="{% url 'excepciones:editar' excepcion.pk %}"><i class="fa-regular fa-pen-to-square" aria-hidden="true"></i> Editar</a>
                             {% endif %}
                         </div>
                     </td>
@@ -121,11 +121,11 @@
 {% if is_paginated %}
     <nav class="pagination" aria-label="Paginacion">
         {% if page_obj.has_previous %}
-            <a class="button button-secondary" href="?q={{ query|urlencode }}&negocio={{ negocio_actual }}&sucursal={{ sucursal_actual }}&profesional={{ profesional_actual }}&tipo={{ tipo_actual }}&fecha={{ fecha_actual }}&estado={{ estado_actual }}&page={{ page_obj.previous_page_number }}">Anterior</a>
+            <a class="button button-secondary" href="?q={{ query|urlencode }}&negocio={{ negocio_actual }}&sucursal={{ sucursal_actual }}&profesional={{ profesional_actual }}&tipo={{ tipo_actual }}&fecha={{ fecha_actual }}&estado={{ estado_actual }}&page={{ page_obj.previous_page_number }}"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i> Anterior</a>
         {% endif %}
         <span class="muted">Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
         {% if page_obj.has_next %}
-            <a class="button button-secondary" href="?q={{ query|urlencode }}&negocio={{ negocio_actual }}&sucursal={{ sucursal_actual }}&profesional={{ profesional_actual }}&tipo={{ tipo_actual }}&fecha={{ fecha_actual }}&estado={{ estado_actual }}&page={{ page_obj.next_page_number }}">Siguiente</a>
+            <a class="button button-secondary" href="?q={{ query|urlencode }}&negocio={{ negocio_actual }}&sucursal={{ sucursal_actual }}&profesional={{ profesional_actual }}&tipo={{ tipo_actual }}&fecha={{ fecha_actual }}&estado={{ estado_actual }}&page={{ page_obj.next_page_number }}">Siguiente <i class="fa-solid fa-chevron-right" aria-hidden="true"></i></a>
         {% endif %}
     </nav>
 {% endif %}

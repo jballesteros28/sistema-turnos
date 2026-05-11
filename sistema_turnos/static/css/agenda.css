@@ -1,17 +1,11 @@
-.toolbar-agenda {
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-}
-
-.toolbar-excepciones {
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-}
-
+.toolbar-agenda,
+.toolbar-excepciones,
 .toolbar-agenda-turnos {
     grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
 }
 
 .agenda-page-header {
-    margin-bottom: 14px;
+    margin-bottom: 16px;
 }
 
 .agenda-week-header {
@@ -22,7 +16,7 @@
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
 }
 
 .agenda-date-nav .button {
@@ -30,11 +24,18 @@
 }
 
 .agenda-horario {
-    font-weight: 700;
+    display: inline-flex;
+    min-width: 58px;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 6px 10px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary-strong);
+    font-weight: 800;
 }
 
 .agenda-turnos-table {
-    min-width: 980px;
+    min-width: 960px;
 }
 
 .agenda-actions {
@@ -47,7 +48,7 @@
 
 .agenda-week-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
     gap: 14px;
     width: 100%;
     min-width: 0;
@@ -56,9 +57,10 @@
 .agenda-day-card {
     min-width: 0;
     overflow: hidden;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-soft);
 }
 
 .agenda-day-header {
@@ -66,39 +68,38 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
-    padding: 14px;
-    border-bottom: 1px solid var(--line);
-    background: #f8fafc;
+    padding: 16px;
+    border-bottom: 1px solid var(--color-border);
+    background: #fbfdff;
 }
 
 .agenda-day-header h2 {
-    margin-bottom: 2px;
+    margin-bottom: 3px;
 }
 
 .agenda-day-count {
+    min-width: 30px;
+    min-height: 30px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 28px;
-    min-height: 28px;
     border-radius: 999px;
-    background: #e0f2fe;
-    color: #075985;
+    background: var(--color-primary-soft);
+    color: var(--color-primary-strong);
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 800;
 }
 
 .agenda-day-turnos {
     display: grid;
-    gap: 0;
 }
 
 .agenda-week-turno {
     display: grid;
-    grid-template-columns: 68px minmax(0, 1fr);
+    grid-template-columns: 72px minmax(0, 1fr);
     gap: 12px;
-    padding: 14px;
-    border-bottom: 1px solid var(--line);
+    padding: 15px 16px;
+    border-bottom: 1px solid var(--color-border);
 }
 
 .agenda-week-turno:last-child {
@@ -107,8 +108,14 @@
 
 .agenda-week-turno-time {
     display: grid;
-    gap: 2px;
+    gap: 4px;
     align-content: start;
+    color: var(--color-base);
+    font-weight: 800;
+}
+
+.agenda-week-turno-time .muted {
+    font-size: 12px;
     font-weight: 700;
 }
 
@@ -119,17 +126,17 @@
 }
 
 .agenda-week-turno-title {
+    min-width: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    min-width: 0;
 }
 
 .agenda-week-turno-title a {
     min-width: 0;
     overflow-wrap: anywhere;
-    font-weight: 700;
+    font-weight: 800;
 }
 
 .agenda-week-turno-data {
@@ -143,52 +150,21 @@
 }
 
 .agenda-week-turno-data dt {
-    color: var(--muted);
+    color: var(--color-muted);
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
 }
 
 .agenda-week-turno-data dd {
     margin: 2px 0 0;
+    color: var(--color-base);
     overflow-wrap: anywhere;
 }
 
 .agenda-day-empty {
-    padding: 14px;
     margin: 0;
-}
-
-.agenda-actions .button,
-.agenda-actions button {
-    min-height: 32px;
-    padding: 5px 10px;
-    font-size: 13px;
-}
-
-.badge-solicitado {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-.badge-confirmado {
-    background: #dbeafe;
-    color: #1d4ed8;
-}
-
-.badge-cancelado {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.badge-completado {
-    background: #dcfce7;
-    color: #166534;
-}
-
-.badge-ausente {
-    background: #f3f4f6;
-    color: #4b5563;
+    padding: 20px 14px;
 }
 
 @media (max-width: 768px) {

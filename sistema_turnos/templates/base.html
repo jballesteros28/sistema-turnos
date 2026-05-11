@@ -5,85 +5,190 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Sistema de turnos{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- En produccion, Font Awesome CDN puede reemplazarse por assets locales versionados. -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     {% block extra_css %}{% endblock %}
     <script src="{% static 'js/base.js' %}" defer></script>
     {% block extra_js %}{% endblock %}
 </head>
 <body>
-    <header class="app-header">
-        <div class="header-inner">
-            <a class="brand" href="{% url 'core:dashboard' %}">Sistema de turnos</a>
-            <div class="header-actions">
-                {% if user.is_authenticated %}
-                    <nav class="nav" aria-label="Principal">
-                        <a href="{% url 'core:dashboard' %}">Dashboard</a>
-                        {% if permisos_ui.puede_ver_negocios %}
-                            <a href="{% url 'negocios:lista' %}">Negocios</a>
-                        {% endif %}
-                        {% if permisos_ui.puede_ver_catalogos %}
-                            <a href="{% url 'sucursales:lista' %}">Sucursales</a>
-                        {% endif %}
-                        {% if permisos_ui.puede_ver_clientes %}
-                            <a href="{% url 'clientes:lista' %}">Clientes</a>
-                        {% endif %}
-                        {% if permisos_ui.puede_ver_catalogos %}
-                            <a href="{% url 'servicios:lista' %}">Servicios</a>
-                            <a href="{% url 'profesionales:lista' %}">Profesionales</a>
-                        {% endif %}
-                        {% if permisos_ui.puede_ver_configuracion %}
-                            <a href="{% url 'configuracion_negocio:lista' %}">Configuraci&oacute;n</a>
-                        {% endif %}
-                        {% if permisos_ui.puede_ver_disponibilidades %}
-                            <a href="{% url 'disponibilidades:lista' %}">Disponibilidad</a>
-                        {% endif %}
-                        {% if permisos_ui.puede_ver_excepciones %}
-                            <a href="{% url 'excepciones:lista' %}">Excepciones</a>
-                        {% endif %}
-                        {% if permisos_ui.puede_ver_turnos %}
-                            <a href="{% url 'turnos:lista' %}">Turnos</a>
-                        {% endif %}
-                        {% if permisos_ui.puede_ver_agenda %}
-                            <a href="{% url 'agenda:turnos' %}">Agenda diaria</a>
-                            <a href="{% url 'agenda:semanal' %}">Agenda semanal</a>
-                        {% endif %}
-                        {% if permisos_ui.puede_ver_admin_django %}
-                            <a href="/admin/">Admin</a>
-                        {% endif %}
-                    </nav>
-                    <div class="user-menu">
-                        <span>Hola, {{ user.username }}</span>
-                        {% if rol_actual_usuario %}
-                            <span class="badge">{{ rol_actual_usuario }}</span>
-                        {% endif %}
-                        <form method="post" action="{% url 'logout' %}">
-                            {% csrf_token %}
-                            <button class="link-button" type="submit">Salir</button>
-                        </form>
+    <a class="skip-link" href="#contenido-principal">Saltar al contenido</a>
+
+    {% if user.is_authenticated %}
+        <div class="app-shell">
+            <aside class="app-sidebar" id="app-sidebar" data-sidebar aria-label="Navegacion principal">
+                <div class="sidebar-header">
+                    <a class="brand" href="{% url 'core:dashboard' %}" aria-label="Sistema de Turnos">
+                        <span class="brand-mark"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i></span>
+                        <span class="brand-copy">
+                            <strong>Sistema de Turnos</strong>
+                            <small>Gestion de agenda</small>
+                        </span>
+                    </a>
+                    <button class="icon-button sidebar-close" type="button" data-sidebar-close aria-label="Cerrar menu">
+                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                    </button>
+                </div>
+
+                <nav class="sidebar-nav" aria-label="Principal">
+                    <a class="sidebar-link {% if request.resolver_match.namespace == 'core' %}is-active{% endif %}" href="{% url 'core:dashboard' %}">
+                        <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    {% if permisos_ui.puede_ver_agenda %}
+                        <a class="sidebar-link {% if request.resolver_match.namespace == 'agenda' and request.resolver_match.url_name == 'turnos' %}is-active{% endif %}" href="{% url 'agenda:turnos' %}">
+                            <i class="fa-regular fa-calendar-days" aria-hidden="true"></i>
+                            <span>Agenda diaria</span>
+                        </a>
+                        <a class="sidebar-link {% if request.resolver_match.namespace == 'agenda' and request.resolver_match.url_name == 'semanal' %}is-active{% endif %}" href="{% url 'agenda:semanal' %}">
+                            <i class="fa-solid fa-calendar-week" aria-hidden="true"></i>
+                            <span>Agenda semanal</span>
+                        </a>
+                    {% endif %}
+                    {% if permisos_ui.puede_ver_turnos %}
+                        <a class="sidebar-link {% if request.resolver_match.namespace == 'turnos' %}is-active{% endif %}" href="{% url 'turnos:lista' %}">
+                            <i class="fa-solid fa-clock" aria-hidden="true"></i>
+                            <span>Turnos</span>
+                        </a>
+                    {% endif %}
+                    {% if permisos_ui.puede_ver_clientes %}
+                        <a class="sidebar-link {% if request.resolver_match.namespace == 'clientes' %}is-active{% endif %}" href="{% url 'clientes:lista' %}">
+                            <i class="fa-solid fa-users" aria-hidden="true"></i>
+                            <span>Clientes</span>
+                        </a>
+                    {% endif %}
+                    {% if permisos_ui.puede_ver_catalogos %}
+                        <a class="sidebar-link {% if request.resolver_match.namespace == 'profesionales' %}is-active{% endif %}" href="{% url 'profesionales:lista' %}">
+                            <i class="fa-solid fa-user-doctor" aria-hidden="true"></i>
+                            <span>Profesionales</span>
+                        </a>
+                        <a class="sidebar-link {% if request.resolver_match.namespace == 'servicios' %}is-active{% endif %}" href="{% url 'servicios:lista' %}">
+                            <i class="fa-solid fa-briefcase" aria-hidden="true"></i>
+                            <span>Servicios</span>
+                        </a>
+                    {% endif %}
+                    {% if permisos_ui.puede_ver_negocios %}
+                        <a class="sidebar-link {% if request.resolver_match.namespace == 'negocios' %}is-active{% endif %}" href="{% url 'negocios:lista' %}">
+                            <i class="fa-solid fa-building" aria-hidden="true"></i>
+                            <span>Negocios</span>
+                        </a>
+                    {% endif %}
+                    {% if permisos_ui.puede_ver_catalogos %}
+                        <a class="sidebar-link {% if request.resolver_match.namespace == 'sucursales' %}is-active{% endif %}" href="{% url 'sucursales:lista' %}">
+                            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                            <span>Sucursales</span>
+                        </a>
+                    {% endif %}
+                    {% if permisos_ui.puede_ver_configuracion %}
+                        <a class="sidebar-link {% if request.resolver_match.namespace == 'configuracion_negocio' %}is-active{% endif %}" href="{% url 'configuracion_negocio:lista' %}">
+                            <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+                            <span>Configuraci&oacute;n</span>
+                        </a>
+                    {% endif %}
+                    {% if permisos_ui.puede_ver_disponibilidades %}
+                        <a class="sidebar-link {% if request.resolver_match.namespace == 'disponibilidades' %}is-active{% endif %}" href="{% url 'disponibilidades:lista' %}">
+                            <i class="fa-solid fa-business-time" aria-hidden="true"></i>
+                            <span>Disponibilidad</span>
+                        </a>
+                    {% endif %}
+                    {% if permisos_ui.puede_ver_excepciones %}
+                        <a class="sidebar-link {% if request.resolver_match.namespace == 'excepciones' %}is-active{% endif %}" href="{% url 'excepciones:lista' %}">
+                            <i class="fa-solid fa-calendar-xmark" aria-hidden="true"></i>
+                            <span>Excepciones</span>
+                        </a>
+                    {% endif %}
+                    {% if permisos_ui.puede_ver_admin_django %}
+                        <a class="sidebar-link" href="/admin/">
+                            <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                            <span>Admin</span>
+                        </a>
+                    {% endif %}
+                </nav>
+
+                <div class="sidebar-footer">
+                    <div class="sidebar-user">
+                        <span class="user-avatar"><i class="fa-regular fa-user" aria-hidden="true"></i></span>
+                        <span class="user-copy">
+                            <strong>{{ user.username }}</strong>
+                            {% if rol_actual_usuario %}
+                                <small>{{ rol_actual_usuario }}</small>
+                            {% else %}
+                                <small>Sin rol asignado</small>
+                            {% endif %}
+                        </span>
                     </div>
-                {% else %}
-                    <nav class="nav" aria-label="Principal">
-                        <a href="{% url 'login' %}">Ingresar</a>
-                    </nav>
-                {% endif %}
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button class="sidebar-logout" type="submit">
+                            <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+                            <span>Salir</span>
+                        </button>
+                    </form>
+                </div>
+            </aside>
+
+            <button class="sidebar-overlay" type="button" data-sidebar-close aria-label="Cerrar menu"></button>
+
+            <div class="app-main">
+                <header class="topbar">
+                    <div class="topbar-left">
+                        <button class="mobile-menu-button" type="button" data-sidebar-toggle aria-controls="app-sidebar" aria-expanded="false">
+                            <i class="fa-solid fa-bars" aria-hidden="true"></i>
+                            <span>Menu</span>
+                        </button>
+                        <div class="topbar-title">
+                            <span>Panel</span>
+                            <strong data-page-title>Sistema de Turnos</strong>
+                        </div>
+                    </div>
+                    <div class="topbar-user" aria-label="Usuario actual">
+                        <span class="user-avatar user-avatar-small"><i class="fa-regular fa-user" aria-hidden="true"></i></span>
+                        <span class="topbar-username">{{ user.username }}</span>
+                        {% if rol_actual_usuario %}
+                            <span class="badge badge-neutral">{{ rol_actual_usuario }}</span>
+                        {% endif %}
+                    </div>
+                </header>
+
+                <main id="contenido-principal" class="app-content">
+    {% else %}
+        <main id="contenido-principal" class="auth-layout">
+            <a class="auth-brand" href="{% url 'login' %}">
+                <span class="brand-mark"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i></span>
+                <span>Sistema de Turnos</span>
+            </a>
+    {% endif %}
+
+                    {% if messages %}
+                        <div class="messages">
+                            {% for message in messages %}
+                                <div class="message">
+                                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                                    <span>{{ message }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {% if user.is_authenticated and usuario_sin_membresias %}
+                        <div class="notice">
+                            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                            <span>No tenés negocios asignados. Contactá a un administrador.</span>
+                        </div>
+                    {% endif %}
+
+                    {% block content %}{% endblock %}
+
+    {% if user.is_authenticated %}
+                </main>
             </div>
         </div>
-    </header>
-
-    <main class="container">
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <div class="message">{{ message }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
-
-        {% if user.is_authenticated and usuario_sin_membresias %}
-            <div class="notice">No tenés negocios asignados. Contactá a un administrador.</div>
-        {% endif %}
-
-        {% block content %}{% endblock %}
-    </main>
+    {% else %}
+        </main>
+    {% endif %}
 </body>
 </html>

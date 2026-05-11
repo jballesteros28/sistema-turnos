@@ -12,10 +12,10 @@
         <h1>Configuracion del negocio</h1>
     </div>
     <div class="actions">
-        <a class="button button-secondary" href="{% url 'configuracion_negocio:lista' %}">Volver</a>
-        <a class="button button-secondary" href="{% url 'negocios:detalle' configuracion.negocio.pk %}">Ver negocio</a>
+        <a class="button button-secondary" href="{% url 'configuracion_negocio:lista' %}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Volver</a>
+        <a class="button button-secondary" href="{% url 'negocios:detalle' configuracion.negocio.pk %}"><i class="fa-regular fa-eye" aria-hidden="true"></i> Ver negocio</a>
         {% if permisos_ui.puede_gestionar_configuracion %}
-            <a class="button" href="{% url 'configuracion_negocio:editar' configuracion.pk %}">Editar</a>
+            <a class="button" href="{% url 'configuracion_negocio:editar' configuracion.pk %}"><i class="fa-regular fa-pen-to-square" aria-hidden="true"></i> Editar</a>
         {% endif %}
     </div>
 </section>

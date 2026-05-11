@@ -11,7 +11,7 @@
         <p class="eyebrow">Profesionales</p>
         <h1>Desactivar profesional</h1>
     </div>
-    <a class="button button-secondary" href="{% url 'profesionales:detalle' profesional.pk %}">Volver</a>
+    <a class="button button-secondary" href="{% url 'profesionales:detalle' profesional.pk %}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Volver</a>
 </section>
 
 <section class="panel">
@@ -20,8 +20,8 @@
 
     <form method="post" class="form-actions">
         {% csrf_token %}
-        <button class="button-danger" type="submit">Desactivar</button>
-        <a class="button button-secondary" href="{% url 'profesionales:detalle' profesional.pk %}">Cancelar</a>
+        <button class="button-danger" type="submit"><i class="fa-solid fa-ban" aria-hidden="true"></i> Desactivar</button>
+        <a class="button button-secondary" href="{% url 'profesionales:detalle' profesional.pk %}"><i class="fa-solid fa-xmark" aria-hidden="true"></i> Cancelar</a>
     </form>
 </section>
 {% endblock %}
