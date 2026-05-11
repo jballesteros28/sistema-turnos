@@ -2,7 +2,7 @@
 
 MVP en Django para administrar turnos de negocios con sucursales, servicios,
 profesionales, clientes, disponibilidad horaria, excepciones de agenda y agenda
-diaria.
+diaria/semanal.
 
 ## Apps principales
 
@@ -15,7 +15,7 @@ diaria.
 - `disponibilidad`: franjas horarias disponibles por sucursal y profesional.
 - `excepcion`: bloqueos o cierres de agenda por negocio, sucursal o profesional.
 - `turnos`: creacion, validacion y cambio de estado de turnos.
-- `agenda`: vista diaria filtrable de turnos.
+- `agenda`: vista diaria y semanal filtrable de turnos.
 - `configuracion_negocio`: parametros operativos del negocio.
 - `usuarios`: membresias entre usuarios Django, negocios y roles de acceso.
 
@@ -31,7 +31,7 @@ diaria.
 8. Cargar excepciones cuando corresponda.
 9. Ajustar la configuracion operativa del negocio.
 10. Crear y operar turnos.
-11. Consultar la agenda diaria.
+11. Consultar la agenda diaria o semanal.
 
 ## Autenticacion y multinegocio
 
@@ -82,6 +82,29 @@ MiembroNegocio.objects.create(
 
 Para usuarios con rol `profesional`, asociar tambien el campo `profesional`.
 
+### Usuarios demo para desarrollo local
+
+Para crear o actualizar usuarios de prueba y datos minimos de demo:
+
+```bash
+python manage.py crear_usuarios_demo
+```
+
+El comando es idempotente: crea lo faltante y reutiliza los registros demo si ya
+existen. Asegura al menos un negocio, sucursal, servicio, profesional, cliente,
+disponibilidad, configuracion de negocio, usuarios y membresias.
+
+Credenciales solo para desarrollo local. No deben usarse en produccion.
+
+| Rol | Username | Password | Que permite probar |
+| --- | --- | --- | --- |
+| superuser Django | `superuser` | `Admin12345!` | Acceso total, admin Django y datos globales. |
+| superadmin | `superadmin` | `Admin12345!` | Gestion global desde la aplicacion. |
+| admin_negocio | `admin_negocio` | `Admin12345!` | Gestion del negocio demo, configuracion y operacion. |
+| recepcionista | `recepcionista` | `Admin12345!` | Operacion diaria: clientes, turnos, agenda, disponibilidad y excepciones. |
+| profesional | `profesional` | `Admin12345!` | Solo sus turnos y agenda asignada. |
+| usuario sin membresia | `sin_membresia` | `Admin12345!` | Login sin datos operativos ni navegacion interna sensible. |
+
 ## Roles y permisos
 
 - `superuser` de Django: puede ver y gestionar todo el sistema, acceder al admin
@@ -114,6 +137,7 @@ Para usuarios con rol `profesional`, asociar tambien el campo `profesional`.
 - `/agenda/excepciones/`
 - `/turnos/`
 - `/agenda/turnos/`
+- `/agenda/semanal/`
 - `/configuracion/`
 
 ## Comandos utiles
@@ -126,6 +150,7 @@ python manage.py runserver
 python manage.py check
 python manage.py test
 python manage.py makemigrations --check --dry-run
+python manage.py crear_usuarios_demo
 ```
 
 ## Notas

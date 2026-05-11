@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Agenda semanal | Sistema de turnos{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/agenda.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/agenda.js' %}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="page-header agenda-page-header agenda-week-header">
+    <div>
+        <p class="eyebrow">Agenda</p>
+        <h1>Agenda semanal</h1>
+        <div class="meta">{{ inicio_semana|date:"d/m/Y" }} al {{ fin_semana|date:"d/m/Y" }}</div>
+    </div>
+    {% if permisos_ui.puede_crear_turnos %}
+        <a class="button" href="{% url 'turnos:crear' %}">Nuevo turno</a>
+    {% endif %}
+</section>
+
+{% if fecha_invalida %}
+    <div class="notice">Fecha invalida, se muestra la semana actual.</div>
+{% endif %}
+{% if not hay_negocios and not usuario_sin_membresias %}
+    <div class="notice">No ten&eacute;s negocios asignados. Contact&aacute; a un administrador.</div>
+{% endif %}
+{% if not hay_profesionales and hay_negocios %}
+    <div class="notice">Primero debes crear un profesional.</div>
+{% endif %}
+{% if not hay_turnos_semana %}
+    <div class="notice">No hay turnos para esta semana.</div>
+{% endif %}
+
+<nav class="agenda-date-nav agenda-week-nav" aria-label="Navegacion de semana">
+    <a class="button button-secondary" href="{{ semana_anterior_url }}">Semana anterior</a>
+    <a class="button button-secondary" href="{{ semana_actual_url }}">Semana actual</a>
+    <a class="button button-secondary" href="{{ semana_siguiente_url }}">Semana siguiente</a>
+</nav>
+
+<form class="toolbar toolbar-agenda toolbar-agenda-turnos" method="get">
+    <input class="input" type="date" name="fecha" value="{{ fecha_actual }}">
+    <select class="input" name="negocio">
+        <option value="">Todos los negocios</option>
+        {% for negocio in negocios %}
+            <option value="{{ negocio.pk }}" {% if negocio.pk|stringformat:"s" == negocio_actual %}selected{% endif %}>{{ negocio.nombre }}</option>
+        {% endfor %}
+    </select>
+    <select class="input" name="sucursal">
+        <option value="">Todas las sucursales</option>
+        {% for sucursal in sucursales %}
+            <option value="{{ sucursal.pk }}" {% if sucursal.pk|stringformat:"s" == sucursal_actual %}selected{% endif %}>{{ sucursal.negocio.nombre }} - {{ sucursal.nombre }}</option>
+        {% endfor %}
+    </select>
+    <select class="input" name="profesional">
+        <option value="">Todos los profesionales</option>
+        {% for profesional in profesionales %}
+            <option value="{{ profesional.pk }}" {% if profesional.pk|stringformat:"s" == profesional_actual %}selected{% endif %}>{{ profesional.negocio.nombre }} - {{ profesional.nombre_visible }}</option>
+        {% endfor %}
+    </select>
+    <select class="input" name="estado">
+        <option value="">Todos los estados</option>
+        {% for value, label in estados %}
+            <option value="{{ value }}" {% if value == estado_actual %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Filtrar</button>
+    {% if fecha_actual or negocio_actual or sucursal_actual or profesional_actual or estado_actual %}
+        <a class="button button-secondary" href="{% url 'agenda:semanal' %}">Limpiar</a>
+    {% endif %}
+</form>
+
+<section class="agenda-week-grid" aria-label="Turnos por dia de la semana">
+    {% for dia in dias_semana %}
+        <article class="agenda-day-card">
+            <header class="agenda-day-header">
+                <div>
+                    <h2>{{ dia.nombre }}</h2>
+                    <div class="meta">{{ dia.fecha|date:"d/m/Y" }}</div>
+                </div>
+                <span class="agenda-day-count">{{ dia.turnos|length }}</span>
+            </header>
+
+            <div class="agenda-day-turnos">
+                {% for turno in dia.turnos %}
+                    <div class="agenda-week-turno">
+                        <div class="agenda-week-turno-time">
+                            <span>{{ turno.fecha_hora_inicio|date:"H:i" }}</span>
+                            <span class="muted">a {{ turno.fecha_hora_fin|date:"H:i" }}</span>
+                        </div>
+                        <div class="agenda-week-turno-body">
+                            <div class="agenda-week-turno-title">
+                                <a href="{% url 'turnos:detalle' turno.pk %}">{{ turno.cliente.nombre_visible }}</a>
+                                <span class="badge badge-{{ turno.estado }}">{{ turno.get_estado_display }}</span>
+                            </div>
+                            <dl class="agenda-week-turno-data">
+                                <div>
+                                    <dt>Profesional</dt>
+                                    <dd>{{ turno.profesional.nombre_visible }}</dd>
+                                </div>
+                                <div>
+                                    <dt>Servicio</dt>
+                                    <dd>{{ turno.servicio.nombre }}</dd>
+                                </div>
+                                <div>
+                                    <dt>Sucursal</dt>
+                                    <dd>{{ turno.sucursal.nombre }}</dd>
+                                </div>
+                            </dl>
+                            <div class="actions agenda-actions">
+                                <a href="{% url 'turnos:detalle' turno.pk %}">Ver detalle</a>
+                                {% if permisos_ui.puede_gestionar_operacion %}
+                                    <a href="{% url 'turnos:editar' turno.pk %}">Editar</a>
+                                    {% if turno.estado == "solicitado" %}
+                                        <form method="post" action="{% url 'turnos:confirmar' turno.pk %}">
+                                            {% csrf_token %}
+                                            <button type="submit">Confirmar</button>
+                                        </form>
+                                    {% endif %}
+                                    {% if turno.estado == "solicitado" or turno.estado == "confirmado" %}
+                                        <form method="post" action="{% url 'turnos:completar' turno.pk %}">
+                                            {% csrf_token %}
+                                            <button type="submit">Completar</button>
+                                        </form>
+                                        <form method="post" action="{% url 'turnos:ausente' turno.pk %}">
+                                            {% csrf_token %}
+                                            <button class="button-secondary" type="submit">Ausente</button>
+                                        </form>
+                                        <a class="button button-danger" href="{% url 'turnos:cancelar' turno.pk %}">Cancelar</a>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="empty agenda-day-empty">Sin turnos.</p>
+                {% endfor %}
+            </div>
+        </article>
+    {% endfor %}
+</section>
+{% endblock %}

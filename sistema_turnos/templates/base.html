@@ -23,11 +23,16 @@
                         {% endif %}
                         {% if permisos_ui.puede_ver_catalogos %}
                             <a href="{% url 'sucursales:lista' %}">Sucursales</a>
-                            <a href="{% url 'servicios:lista' %}">Servicios</a>
-                            <a href="{% url 'profesionales:lista' %}">Profesionales</a>
                         {% endif %}
                         {% if permisos_ui.puede_ver_clientes %}
                             <a href="{% url 'clientes:lista' %}">Clientes</a>
+                        {% endif %}
+                        {% if permisos_ui.puede_ver_catalogos %}
+                            <a href="{% url 'servicios:lista' %}">Servicios</a>
+                            <a href="{% url 'profesionales:lista' %}">Profesionales</a>
+                        {% endif %}
+                        {% if permisos_ui.puede_ver_configuracion %}
+                            <a href="{% url 'configuracion_negocio:lista' %}">Configuraci&oacute;n</a>
                         {% endif %}
                         {% if permisos_ui.puede_ver_disponibilidades %}
                             <a href="{% url 'disponibilidades:lista' %}">Disponibilidad</a>
@@ -39,10 +44,8 @@
                             <a href="{% url 'turnos:lista' %}">Turnos</a>
                         {% endif %}
                         {% if permisos_ui.puede_ver_agenda %}
-                            <a href="{% url 'agenda:turnos' %}">Agenda</a>
-                        {% endif %}
-                        {% if permisos_ui.puede_ver_configuracion %}
-                            <a href="{% url 'configuracion_negocio:lista' %}">Configuracion</a>
+                            <a href="{% url 'agenda:turnos' %}">Agenda diaria</a>
+                            <a href="{% url 'agenda:semanal' %}">Agenda semanal</a>
                         {% endif %}
                         {% if permisos_ui.puede_ver_admin_django %}
                             <a href="/admin/">Admin</a>

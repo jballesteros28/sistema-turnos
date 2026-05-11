@@ -14,6 +14,10 @@
     margin-bottom: 14px;
 }
 
+.agenda-week-header {
+    align-items: center;
+}
+
 .agenda-date-nav {
     display: flex;
     gap: 10px;
@@ -38,6 +42,120 @@
 }
 
 .agenda-actions form {
+    margin: 0;
+}
+
+.agenda-week-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+    width: 100%;
+    min-width: 0;
+}
+
+.agenda-day-card {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+
+.agenda-day-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px;
+    border-bottom: 1px solid var(--line);
+    background: #f8fafc;
+}
+
+.agenda-day-header h2 {
+    margin-bottom: 2px;
+}
+
+.agenda-day-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    min-height: 28px;
+    border-radius: 999px;
+    background: #e0f2fe;
+    color: #075985;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.agenda-day-turnos {
+    display: grid;
+    gap: 0;
+}
+
+.agenda-week-turno {
+    display: grid;
+    grid-template-columns: 68px minmax(0, 1fr);
+    gap: 12px;
+    padding: 14px;
+    border-bottom: 1px solid var(--line);
+}
+
+.agenda-week-turno:last-child {
+    border-bottom: 0;
+}
+
+.agenda-week-turno-time {
+    display: grid;
+    gap: 2px;
+    align-content: start;
+    font-weight: 700;
+}
+
+.agenda-week-turno-body {
+    min-width: 0;
+    display: grid;
+    gap: 10px;
+}
+
+.agenda-week-turno-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+}
+
+.agenda-week-turno-title a {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-weight: 700;
+}
+
+.agenda-week-turno-data {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+}
+
+.agenda-week-turno-data div {
+    min-width: 0;
+}
+
+.agenda-week-turno-data dt {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.agenda-week-turno-data dd {
+    margin: 2px 0 0;
+    overflow-wrap: anywhere;
+}
+
+.agenda-day-empty {
+    padding: 14px;
     margin: 0;
 }
 
@@ -87,5 +205,18 @@
 
     .agenda-date-nav .button {
         width: 100%;
+    }
+
+    .agenda-week-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .agenda-week-turno {
+        grid-template-columns: 1fr;
+    }
+
+    .agenda-week-turno-title {
+        align-items: flex-start;
+        flex-direction: column;
     }
 }

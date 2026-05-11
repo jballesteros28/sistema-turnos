@@ -24,7 +24,7 @@ urlpatterns = [
     path('', RedirectView.as_view(pattern_name='core:dashboard', permanent=False)),
     path('accounts/', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
-    path('agenda/turnos/', include('agenda.urls')),
+    path('agenda/', include('agenda.urls')),
     path('agenda/disponibilidades/', include('disponibilidad.urls')),
     path('agenda/excepciones/', include('excepcion.urls')),
     path('clientes/', include('clientes.urls')),
