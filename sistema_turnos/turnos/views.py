@@ -13,6 +13,13 @@ from clientes.models import Cliente
 from configuracion_negocio.models import get_configuracion_turnos
 from disponibilidad.models import Disponibilidad
 from negocio.models import Negocio
+from notificaciones.services import (
+    enviar_email_turno_ausente,
+    enviar_email_turno_cancelado,
+    enviar_email_turno_completado,
+    enviar_email_turno_confirmado,
+    enviar_email_turno_creado,
+)
 from profesional.models import Profesional
 from servicio.models import Servicio
 from sistema_turnos.view_utils import get_query_id, get_query_initial
@@ -252,6 +259,7 @@ class TurnoCreateView(
 
     def form_valid(self, form):
         response = super().form_valid(form)
+        enviar_email_turno_creado(self.object)
         messages.success(self.request, "Turno creado correctamente.")
         return response
 
@@ -307,6 +315,7 @@ class TurnoCancelarView(
             messages.error(request, error)
             return redirect("turnos:detalle", pk=turno.pk)
 
+        estado_anterior = turno.estado
         turno.estado = EstadoTurno.CANCELADO
         turno.cancelado_en = timezone.now()
         turno.motivo_cancelacion = request.POST.get("motivo_cancelacion", "").strip()
@@ -318,6 +327,8 @@ class TurnoCancelarView(
                 "actualizado_en",
             ]
         )
+        if estado_anterior != EstadoTurno.CANCELADO:
+            enviar_email_turno_cancelado(turno, motivo=turno.motivo_cancelacion)
         messages.success(request, "Turno cancelado correctamente.")
         return redirect("turnos:detalle", pk=turno.pk)
 
@@ -352,6 +363,7 @@ class TurnoCambiarEstadoView(
 
     def post(self, request, *args, **kwargs):
         turno = get_object_or_404(self.get_queryset(), pk=self.kwargs["pk"])
+        estado_anterior = turno.estado
         turno.estado = self.estado
         update_fields = ["estado", "actualizado_en"]
 
@@ -360,20 +372,34 @@ class TurnoCambiarEstadoView(
             update_fields.append("confirmado_en")
 
         turno.save(update_fields=update_fields)
+        if estado_anterior != self.estado:
+            self.enviar_notificacion(turno)
         messages.success(request, self.mensaje)
         return redirect("turnos:detalle", pk=turno.pk)
+
+    def enviar_notificacion(self, turno):
+        return None
 
 
 class TurnoConfirmarView(TurnoCambiarEstadoView):
     estado = EstadoTurno.CONFIRMADO
     mensaje = "Turno confirmado correctamente."
 
+    def enviar_notificacion(self, turno):
+        enviar_email_turno_confirmado(turno)
+
 
 class TurnoCompletarView(TurnoCambiarEstadoView):
     estado = EstadoTurno.COMPLETADO
     mensaje = "Turno marcado como completado."
 
+    def enviar_notificacion(self, turno):
+        enviar_email_turno_completado(turno)
+
 
 class TurnoAusenteView(TurnoCambiarEstadoView):
     estado = EstadoTurno.AUSENTE
     mensaje = "Turno marcado como ausente."
+
+    def enviar_notificacion(self, turno):
+        enviar_email_turno_ausente(turno)

@@ -17,6 +17,7 @@ diaria/semanal.
 - `turnos`: creacion, validacion y cambio de estado de turnos.
 - `agenda`: vista diaria y semanal filtrable de turnos.
 - `configuracion_negocio`: parametros operativos del negocio.
+- `notificaciones`: registro y envio basico de emails de eventos de turnos.
 - `usuarios`: membresias entre usuarios Django, negocios y roles de acceso.
 
 ## Flujo operativo
@@ -140,6 +141,161 @@ Credenciales solo para desarrollo local. No deben usarse en produccion.
 - `/agenda/semanal/`
 - `/configuracion/`
 
+## Notificaciones por email
+
+El sistema envia emails basicos para eventos principales de turnos usando el
+email nativo de Django. En desarrollo el backend por defecto escribe los
+mensajes en consola:
+
+```python
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+```
+
+Variables de entorno disponibles para configurar SMTP en el futuro:
+
+- `EMAIL_BACKEND`
+- `EMAIL_HOST`
+- `EMAIL_PORT`
+- `EMAIL_HOST_USER`
+- `EMAIL_HOST_PASSWORD`
+- `EMAIL_USE_TLS`
+- `EMAIL_USE_SSL`
+- `DEFAULT_FROM_EMAIL`
+
+`DEFAULT_FROM_EMAIL` usa por defecto
+`no-reply@sistema-turnos.local`. No se deben hardcodear credenciales reales en
+el repositorio.
+
+Eventos que disparan email en esta etapa:
+
+- turno creado
+- turno confirmado
+- turno cancelado
+- turno completado
+- turno marcado como ausente
+
+El envio es simple y sincronico. Si el cliente no tiene email, el flujo del
+turno continua sin crear notificacion. Si el envio falla, se registra el intento
+como fallido y el turno no se rompe. Celery, Redis, recordatorios programados y
+colas asincronicas quedan para una etapa futura.
+
+## Preparacion para produccion
+
+El proyecto queda preparado para un deploy controlado mediante variables de
+entorno. No se debe commitear un archivo `.env` real ni credenciales secretas;
+usar `.env.example` como referencia. Django lee variables del entorno del
+proceso; si se usa un archivo `.env`, debe cargarlo la shell, el servicio o la
+plataforma de deploy.
+
+### Variables de entorno necesarias
+
+- `DJANGO_SECRET_KEY`: clave secreta de Django. Obligatoria en produccion.
+- `DJANGO_DEBUG`: `True` en desarrollo, `False` en produccion.
+- `DJANGO_ALLOWED_HOSTS`: hosts permitidos separados por coma.
+- `DJANGO_CSRF_TRUSTED_ORIGINS`: origenes confiables separados por coma, con
+  esquema `https://` en produccion.
+- `DATABASE_ENGINE`: `sqlite` para local o `postgres` para produccion.
+- `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD`, `DATABASE_HOST`,
+  `DATABASE_PORT`: datos de conexion de base.
+- `EMAIL_BACKEND`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`,
+  `EMAIL_HOST_PASSWORD`, `EMAIL_USE_TLS`, `EMAIL_USE_SSL`,
+  `DEFAULT_FROM_EMAIL`: configuracion de email.
+- `STATIC_URL`, `MEDIA_URL`: URLs publicas de archivos estaticos y media.
+- `SECURE_SSL_REDIRECT`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`,
+  `SECURE_HSTS_SECONDS`, `SECURE_HSTS_INCLUDE_SUBDOMAINS`,
+  `SECURE_HSTS_PRELOAD`: controles de seguridad para HTTPS.
+
+### Ejemplo de `.env` local
+
+```env
+DJANGO_SECRET_KEY=dev-insecure-local-key
+DJANGO_DEBUG=True
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+DJANGO_CSRF_TRUSTED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000
+
+DATABASE_ENGINE=sqlite
+DATABASE_NAME=db.sqlite3
+
+EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_USE_SSL=False
+DEFAULT_FROM_EMAIL=no-reply@sistema-turnos.local
+
+STATIC_URL=/static/
+MEDIA_URL=/media/
+
+SECURE_SSL_REDIRECT=False
+SESSION_COOKIE_SECURE=False
+CSRF_COOKIE_SECURE=False
+SECURE_HSTS_SECONDS=0
+SECURE_HSTS_INCLUDE_SUBDOMAINS=False
+SECURE_HSTS_PRELOAD=False
+```
+
+### Ejemplo de `.env` produccion
+
+```env
+DJANGO_SECRET_KEY=change-me-with-a-real-secret
+DJANGO_DEBUG=False
+DJANGO_ALLOWED_HOSTS=turnos.example.com
+DJANGO_CSRF_TRUSTED_ORIGINS=https://turnos.example.com
+
+DATABASE_ENGINE=postgres
+DATABASE_NAME=sistema_turnos
+DATABASE_USER=sistema_turnos_user
+DATABASE_PASSWORD=change_me
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.example.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=sistema-turnos@example.com
+EMAIL_HOST_PASSWORD=change_me
+EMAIL_USE_TLS=True
+EMAIL_USE_SSL=False
+DEFAULT_FROM_EMAIL=no-reply@example.com
+
+STATIC_URL=/static/
+MEDIA_URL=/media/
+
+SECURE_SSL_REDIRECT=True
+SESSION_COOKIE_SECURE=True
+CSRF_COOKIE_SECURE=True
+SECURE_HSTS_SECONDS=31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS=True
+SECURE_HSTS_PRELOAD=True
+```
+
+### Comandos de preparacion
+
+Desde la raiz del repositorio:
+
+```bash
+pip install -r requirements.txt
+```
+
+Desde la carpeta del proyecto Django:
+
+```bash
+cd sistema_turnos
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py crear_usuarios_demo
+python manage.py collectstatic --noinput
+python manage.py check
+python manage.py check --deploy
+python manage.py test
+```
+
+`crear_usuarios_demo` es solo para desarrollo local. No usar credenciales demo
+en produccion.
+
+En produccion, los archivos estaticos recolectados en `staticfiles/` deben ser
+servidos por el servidor web o la plataforma de deploy. Django solo sirve
+archivos `media/` desde `urls.py` cuando `DEBUG=True`.
+
 ## Comandos utiles
 
 Desde la carpeta del proyecto Django:
@@ -148,8 +304,10 @@ Desde la carpeta del proyecto Django:
 cd sistema_turnos
 python manage.py runserver
 python manage.py check
+python manage.py check --deploy
 python manage.py test
 python manage.py makemigrations --check --dry-run
+python manage.py collectstatic --noinput
 python manage.py crear_usuarios_demo
 ```
 

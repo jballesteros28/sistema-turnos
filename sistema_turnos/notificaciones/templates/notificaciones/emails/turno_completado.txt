@@ -1,0 +1,12 @@
+Hola {{ cliente_nombre }},
+
+Tu turno en {{ negocio_nombre }} fue marcado como completado.
+
+Estado: {{ estado }}
+Servicio: {{ servicio.nombre }}
+Profesional: {{ profesional.nombre_visible }}
+Sucursal: {{ sucursal.nombre }}
+Fecha y hora: {{ fecha_hora|date:"d/m/Y H:i" }}
+
+Gracias,
+{{ negocio_nombre }}

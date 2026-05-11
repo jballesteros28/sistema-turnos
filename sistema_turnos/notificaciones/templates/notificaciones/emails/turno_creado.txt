@@ -1,0 +1,15 @@
+Hola {{ cliente_nombre }},
+
+Tu turno en {{ negocio_nombre }} fue creado correctamente.
+
+Estado: {{ estado }}
+Servicio: {{ servicio.nombre }}
+Profesional: {{ profesional.nombre_visible }}
+Sucursal: {{ sucursal.nombre }}
+Fecha y hora: {{ fecha_hora|date:"d/m/Y H:i" }}
+
+{% if telefono_contacto %}Telefono de contacto: {{ telefono_contacto }}{% endif %}
+{% if whatsapp_contacto %}WhatsApp: {{ whatsapp_contacto }}{% endif %}
+
+Gracias,
+{{ negocio_nombre }}

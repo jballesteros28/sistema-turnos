@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="es">
+<body>
+    <p>Hola {{ cliente_nombre }},</p>
+    <p>Registramos una ausencia para tu turno en <strong>{{ negocio_nombre }}</strong>.</p>
+    <ul>
+        <li><strong>Estado:</strong> {{ estado }}</li>
+        <li><strong>Servicio:</strong> {{ servicio.nombre }}</li>
+        <li><strong>Profesional:</strong> {{ profesional.nombre_visible }}</li>
+        <li><strong>Sucursal:</strong> {{ sucursal.nombre }}</li>
+        <li><strong>Fecha y hora:</strong> {{ fecha_hora|date:"d/m/Y H:i" }}</li>
+    </ul>
+    {% if telefono_contacto %}<p>Telefono de contacto: {{ telefono_contacto }}</p>{% endif %}
+    {% if whatsapp_contacto %}<p>WhatsApp: {{ whatsapp_contacto }}</p>{% endif %}
+    <p>Gracias,<br>{{ negocio_nombre }}</p>
+</body>
+</html>

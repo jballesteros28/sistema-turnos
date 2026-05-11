@@ -13,20 +13,61 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+def get_bool_env(name, default=False):
+    value = os.getenv(name)
+    if value is None:
+        return default
+
+    normalized = value.strip().lower()
+    if normalized in ("1", "true", "yes", "y", "on"):
+        return True
+    if normalized in ("0", "false", "no", "n", "off"):
+        return False
+    return default
+
+
+def get_int_env(name, default):
+    value = os.getenv(name)
+    if not value:
+        return default
+    try:
+        return int(value)
+    except ValueError:
+        return default
+
+
+def get_list_env(name, default=""):
+    value = os.getenv(name, default)
+    if isinstance(value, (list, tuple)):
+        return list(value)
+    return [item.strip() for item in value.split(",") if item.strip()]
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY", "dev-insecure-key")
+SECRET_KEY = (
+    os.getenv("DJANGO_SECRET_KEY")
+    or os.getenv("SECRET_KEY")
+    or "dev-insecure-key"
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = get_bool_env("DJANGO_DEBUG", True)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = get_list_env("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
+
+CSRF_TRUSTED_ORIGINS = get_list_env(
+    "DJANGO_CSRF_TRUSTED_ORIGINS",
+    "http://localhost:8000,http://127.0.0.1:8000",
+)
 
 
 # Application definition
@@ -46,6 +87,7 @@ INSTALLED_APPS = [
     'disponibilidad',
     'excepcion',
     'negocio',
+    'notificaciones',
     'profesional',
     'servicio',
     'sucursal',
@@ -86,12 +128,35 @@ WSGI_APPLICATION = 'sistema_turnos.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+DATABASE_ENGINE = (os.getenv("DATABASE_ENGINE") or "sqlite").strip().lower()
+
+if DATABASE_ENGINE in ("sqlite", "sqlite3"):
+    database_name = os.getenv("DATABASE_NAME", "db.sqlite3") or "db.sqlite3"
+    database_path = Path(database_name)
+    if not database_path.is_absolute():
+        database_path = BASE_DIR / database_path
+
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': database_path,
+        }
     }
-}
+elif DATABASE_ENGINE in ("postgres", "postgresql"):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv("DATABASE_NAME", "sistema_turnos"),
+            'USER': os.getenv("DATABASE_USER", ""),
+            'PASSWORD': os.getenv("DATABASE_PASSWORD", ""),
+            'HOST': os.getenv("DATABASE_HOST", ""),
+            'PORT': os.getenv("DATABASE_PORT", ""),
+        }
+    }
+else:
+    raise ImproperlyConfigured(
+        "DATABASE_ENGINE debe ser 'sqlite' o 'postgres'."
+    )
 
 
 # Password validation
@@ -128,11 +193,36 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = os.getenv("STATIC_URL") or "/static/"
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-MEDIA_URL = '/media/'
+MEDIA_URL = os.getenv("MEDIA_URL") or "/media/"
 MEDIA_ROOT = BASE_DIR / 'media'
+
+EMAIL_BACKEND = (
+    os.getenv("EMAIL_BACKEND")
+    or "django.core.mail.backends.console.EmailBackend"
+)
+EMAIL_HOST = os.getenv("EMAIL_HOST", "")
+EMAIL_PORT = get_int_env("EMAIL_PORT", 587)
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = get_bool_env("EMAIL_USE_TLS", True)
+EMAIL_USE_SSL = get_bool_env("EMAIL_USE_SSL", False)
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL") or (
+    "no-reply@sistema-turnos.local"
+)
+
+SECURE_SSL_REDIRECT = get_bool_env("SECURE_SSL_REDIRECT", False)
+SESSION_COOKIE_SECURE = get_bool_env("SESSION_COOKIE_SECURE", False)
+CSRF_COOKIE_SECURE = get_bool_env("CSRF_COOKIE_SECURE", False)
+SECURE_HSTS_SECONDS = get_int_env("SECURE_HSTS_SECONDS", 0)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = get_bool_env(
+    "SECURE_HSTS_INCLUDE_SUBDOMAINS",
+    False,
+)
+SECURE_HSTS_PRELOAD = get_bool_env("SECURE_HSTS_PRELOAD", False)
 
 LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/dashboard/"
