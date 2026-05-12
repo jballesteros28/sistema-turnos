@@ -167,6 +167,71 @@
     padding: 20px 14px;
 }
 
+.availability-days {
+    display: grid;
+    gap: 12px;
+}
+
+.availability-days-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.availability-day-presets {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.availability-preset {
+    min-height: 32px;
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+.availability-day-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.availability-day-option {
+    min-width: 0;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    background: #fbfdff;
+    color: var(--color-base);
+    cursor: pointer;
+    transition: border-color 160ms ease, background 160ms ease;
+}
+
+.availability-day-option:hover {
+    border-color: var(--color-border-strong);
+    background: var(--color-surface);
+}
+
+.availability-day-option input {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    accent-color: var(--color-primary);
+}
+
+.availability-day-option span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 @media (max-width: 768px) {
     .toolbar-agenda,
     .toolbar-excepciones,
@@ -194,5 +259,13 @@
     .agenda-week-turno-title {
         align-items: flex-start;
         flex-direction: column;
+    }
+
+    .availability-days-header {
+        display: grid;
+    }
+
+    .availability-day-presets {
+        justify-content: flex-start;
     }
 }

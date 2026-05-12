@@ -15,6 +15,7 @@ from usuarios.models import MiembroNegocio, RolMiembroNegocio
 
 DEMO_PASSWORD = "Admin12345!"
 DEMO_NEGOCIO = "Negocio Demo"
+DIAS_DEMO = [0, 1, 2, 3, 4]
 
 
 class Command(BaseCommand):
@@ -184,18 +185,41 @@ class Command(BaseCommand):
         return cliente
 
     def _ensure_disponibilidad(self, negocio, sucursal, profesional):
-        disponibilidad, _created = Disponibilidad.objects.get_or_create(
-            negocio=negocio,
-            sucursal=sucursal,
-            profesional=profesional,
-            dia_semana=0,
-            hora_inicio=time(9, 0),
-            hora_fin=time(18, 0),
-            defaults={"activo": True},
+        disponibilidad = (
+            Disponibilidad.objects.filter(
+                negocio=negocio,
+                sucursal=sucursal,
+                profesional=profesional,
+                hora_inicio=time(9, 0),
+                hora_fin=time(18, 0),
+            )
+            .order_by("pk")
+            .first()
         )
+
+        if disponibilidad is None:
+            return Disponibilidad.objects.create(
+                negocio=negocio,
+                sucursal=sucursal,
+                profesional=profesional,
+                dia_semana=0,
+                dias_semana=DIAS_DEMO,
+                hora_inicio=time(9, 0),
+                hora_fin=time(18, 0),
+                activo=True,
+            )
+
+        update_fields = []
+        if disponibilidad.dias_semana_normalizados() != DIAS_DEMO:
+            disponibilidad.dias_semana = DIAS_DEMO
+            disponibilidad.dia_semana = DIAS_DEMO[0]
+            update_fields.extend(["dias_semana", "dia_semana"])
         if not disponibilidad.activo:
             disponibilidad.activo = True
-            disponibilidad.save(update_fields=["activo", "actualizado_en"])
+            update_fields.append("activo")
+        if update_fields:
+            update_fields.append("actualizado_en")
+            disponibilidad.save(update_fields=update_fields)
         return disponibilidad
 
     def _ensure_configuracion(self, negocio):

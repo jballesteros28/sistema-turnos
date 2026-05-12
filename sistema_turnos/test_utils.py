@@ -156,15 +156,28 @@ def time_value(value):
     return value.strftime("%H:%M")
 
 
-def create_availability(domain, *, date_value=None, start=time(9, 0), end=time(18, 0), **kwargs):
+def create_availability(
+    domain,
+    *,
+    date_value=None,
+    start=time(9, 0),
+    end=time(18, 0),
+    dias_semana=None,
+    **kwargs,
+):
     if date_value is None:
         date_value = future_date()
+
+    dia_semana = kwargs.pop("dia_semana", date_value.weekday())
+    if dias_semana is None:
+        dias_semana = [dia_semana]
 
     data = {
         "negocio": domain.negocio,
         "sucursal": domain.sucursal,
         "profesional": domain.profesional,
-        "dia_semana": date_value.weekday(),
+        "dia_semana": dia_semana,
+        "dias_semana": dias_semana,
         "hora_inicio": start,
         "hora_fin": end,
     }
@@ -176,6 +189,7 @@ def disponibilidad_form_data(
     domain,
     *,
     dia_semana=None,
+    dias_semana=None,
     hora_inicio=time(9, 0),
     hora_fin=time(18, 0),
     fecha_desde="",
@@ -184,12 +198,15 @@ def disponibilidad_form_data(
 ):
     if dia_semana is None:
         dia_semana = future_date().weekday()
+    if dias_semana is None:
+        dias_semana = [dia_semana]
 
     return {
         "negocio": domain.negocio.pk,
         "sucursal": domain.sucursal.pk,
         "profesional": domain.profesional.pk,
         "dia_semana": dia_semana,
+        "dias_semana": [str(dia) for dia in dias_semana],
         "hora_inicio": time_value(hora_inicio),
         "hora_fin": time_value(hora_fin),
         "fecha_desde": fecha_desde,

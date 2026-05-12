@@ -4,17 +4,28 @@ from profesional.models import EstadoProfesional
 from sucursal.models import EstadoSucursal
 from usuarios.form_utils import limitar_querysets_por_usuario
 
-from .models import Disponibilidad
+from .models import DiaSemana, Disponibilidad, normalizar_dias_semana
 
 
 class DisponibilidadForm(forms.ModelForm):
+    dias_semana = forms.TypedMultipleChoiceField(
+        choices=DiaSemana.choices,
+        coerce=int,
+        widget=forms.CheckboxSelectMultiple,
+        label="Dias de atencion",
+        required=True,
+        error_messages={
+            "required": "Selecciona al menos un dia de atencion.",
+        },
+    )
+
     class Meta:
         model = Disponibilidad
         fields = [
             "negocio",
             "sucursal",
             "profesional",
-            "dia_semana",
+            "dias_semana",
             "hora_inicio",
             "hora_fin",
             "fecha_desde",
@@ -25,7 +36,7 @@ class DisponibilidadForm(forms.ModelForm):
             "negocio": "Negocio",
             "sucursal": "Sucursal",
             "profesional": "Profesional",
-            "dia_semana": "Dia de semana",
+            "dias_semana": "Dias de atencion",
             "hora_inicio": "Hora de inicio",
             "hora_fin": "Hora de fin",
             "fecha_desde": "Fecha desde",
@@ -45,18 +56,29 @@ class DisponibilidadForm(forms.ModelForm):
         self.label_suffix = ""
         limitar_querysets_por_usuario(self, self.user, gestion_operacion=True)
 
+        if self.instance.pk and not self.is_bound:
+            self.fields["dias_semana"].initial = self.instance.dias_semana_normalizados()
+
         for field in self.fields.values():
-            if isinstance(field.widget, forms.CheckboxInput):
+            if isinstance(field.widget, forms.CheckboxSelectMultiple):
+                field.widget.attrs.setdefault("class", "weekday-checkboxes")
+            elif isinstance(field.widget, forms.CheckboxInput):
                 field.widget.attrs.setdefault("class", "checkbox-input")
             else:
                 field.widget.attrs.setdefault("class", "input")
+
+    def clean_dias_semana(self):
+        dias_semana = normalizar_dias_semana(self.cleaned_data["dias_semana"])
+        if not dias_semana:
+            raise forms.ValidationError("Selecciona al menos un dia de atencion.")
+        return dias_semana
 
     def clean(self):
         cleaned_data = super().clean()
         negocio = cleaned_data.get("negocio")
         sucursal = cleaned_data.get("sucursal")
         profesional = cleaned_data.get("profesional")
-        dia_semana = cleaned_data.get("dia_semana")
+        dias_semana = cleaned_data.get("dias_semana") or []
         hora_inicio = cleaned_data.get("hora_inicio")
         hora_fin = cleaned_data.get("hora_fin")
         fecha_desde = cleaned_data.get("fecha_desde")
@@ -98,21 +120,36 @@ class DisponibilidadForm(forms.ModelForm):
                 "El profesional debe estar asociado a la sucursal seleccionada.",
             )
 
-        if negocio and sucursal and profesional and dia_semana is not None and hora_inicio and hora_fin:
+        if negocio and sucursal and profesional and dias_semana and hora_inicio and hora_fin:
             disponibilidades = Disponibilidad.objects.filter(
                 negocio=negocio,
                 sucursal=sucursal,
                 profesional=profesional,
-                dia_semana=dia_semana,
-                hora_inicio=hora_inicio,
-                hora_fin=hora_fin,
             )
             if self.instance.pk:
                 disponibilidades = disponibilidades.exclude(pk=self.instance.pk)
-            if disponibilidades.exists():
-                self.add_error(
-                    "hora_inicio",
-                    "Ya existe una disponibilidad con esa misma franja.",
+            for disponibilidad in disponibilidades:
+                dias_compartidos = set(dias_semana).intersection(
+                    disponibilidad.dias_semana_normalizados()
                 )
+                horarios_solapados = (
+                    hora_inicio < disponibilidad.hora_fin
+                    and hora_fin > disponibilidad.hora_inicio
+                )
+                if dias_compartidos and horarios_solapados:
+                    self.add_error(
+                        "hora_inicio",
+                        (
+                            "Ya existe una disponibilidad con dias y horarios "
+                            "superpuestos."
+                        ),
+                    )
+                    break
 
         return cleaned_data
+
+    def save(self, commit=True):
+        self.instance.dias_semana = self.cleaned_data["dias_semana"]
+        if self.instance.dias_semana:
+            self.instance.dia_semana = self.instance.dias_semana[0]
+        return super().save(commit=commit)

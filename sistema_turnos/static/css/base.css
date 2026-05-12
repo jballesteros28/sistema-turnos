@@ -237,11 +237,28 @@ button {
     min-width: 0;
     display: grid;
     align-content: start;
-    gap: 4px;
+    gap: 14px;
     overflow-y: auto;
     padding: 2px 0;
     scrollbar-width: thin;
     scrollbar-color: rgba(148, 163, 184, 0.5) transparent;
+}
+
+.sidebar-group {
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+}
+
+.sidebar-group-title {
+    margin: 0;
+    padding: 0 11px 3px;
+    color: #94a3b8;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 1.2;
+    text-transform: uppercase;
 }
 
 .sidebar-link {

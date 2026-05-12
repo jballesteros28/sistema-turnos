@@ -274,7 +274,6 @@ class TurnoForm(forms.ModelForm):
             negocio=negocio,
             sucursal=sucursal,
             profesional=profesional,
-            dia_semana=inicio_local.weekday(),
             activo=True,
             hora_inicio__lte=inicio_local.time(),
             hora_fin__gte=fin_local.time(),
@@ -283,7 +282,8 @@ class TurnoForm(forms.ModelForm):
             Q(fecha_hasta__isnull=True) | Q(fecha_hasta__gte=fecha_turno),
         )
 
-        if not disponibilidades.exists():
+        dia_turno = inicio_local.weekday()
+        if not any(disponibilidad.incluye_dia(dia_turno) for disponibilidad in disponibilidades):
             self.add_error(
                 "fecha_hora_inicio",
                 "El turno debe caer dentro de una disponibilidad activa.",

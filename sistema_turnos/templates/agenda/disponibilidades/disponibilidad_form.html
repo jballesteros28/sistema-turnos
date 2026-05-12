@@ -31,8 +31,28 @@
 
     <div class="form-grid">
         {% for field in form %}
-            <div class="field">
-                {% if field.field.widget.input_type == "checkbox" %}
+            <div class="field {% if field.name == 'dias_semana' %}span-2{% endif %}">
+                {% if field.name == "dias_semana" %}
+                    <div class="availability-days" data-weekday-picker>
+                        <div class="availability-days-header">
+                            <label>{{ field.label }}</label>
+                            <div class="availability-day-presets">
+                                <button class="button-secondary availability-preset" type="button" data-day-preset="weekdays">Lunes a viernes</button>
+                                <button class="button-secondary availability-preset" type="button" data-day-preset="week-saturday">Lunes a sabado</button>
+                                <button class="button-secondary availability-preset" type="button" data-day-preset="all">Todos</button>
+                                <button class="button-secondary availability-preset" type="button" data-day-preset="clear">Limpiar</button>
+                            </div>
+                        </div>
+                        <div class="availability-day-grid">
+                            {% for checkbox in field %}
+                                <label class="availability-day-option" for="{{ checkbox.id_for_label }}">
+                                    {{ checkbox.tag }}
+                                    <span>{{ checkbox.choice_label }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% elif field.field.widget.input_type == "checkbox" %}
                     <label class="checkbox-label" for="{{ field.id_for_label }}">
                         {{ field }}
                         <span>{{ field.label }}</span>

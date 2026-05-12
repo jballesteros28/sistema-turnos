@@ -255,6 +255,27 @@ class TurnoFormTests(TestCase):
 
                 self.assertTrue(form.is_valid(), form.errors)
 
+    def test_permite_turno_miercoles_en_disponibilidad_lunes_a_viernes(self):
+        domain = create_domain(prefix="Turno Miercoles")
+        fecha = self._fecha_con_weekday(2)
+        inicio = aware_datetime_for_date(fecha, 10, 0)
+        create_availability(domain, date_value=fecha, dias_semana=[0, 1, 2, 3, 4])
+
+        form = TurnoForm(data=turno_form_data(domain, inicio=inicio))
+
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_no_permite_turno_sabado_fuera_de_lunes_a_viernes(self):
+        domain = create_domain(prefix="Turno Sabado")
+        fecha = self._fecha_con_weekday(5)
+        inicio = aware_datetime_for_date(fecha, 10, 0)
+        create_availability(domain, date_value=fecha, dias_semana=[0, 1, 2, 3, 4])
+
+        form = TurnoForm(data=turno_form_data(domain, inicio=inicio))
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("fecha_hora_inicio", form.errors)
+
     def _crear_excepcion(self, *, tipo, sucursal=None, profesional=None, activo=True):
         return ExcepcionAgenda.objects.create(
             negocio=self.domain.negocio,
@@ -285,6 +306,12 @@ class TurnoFormTests(TestCase):
             fecha_hora_fin=fin,
             estado=estado,
         )
+
+    def _fecha_con_weekday(self, weekday):
+        fecha = future_date(days=10)
+        while fecha.weekday() != weekday:
+            fecha += timedelta(days=1)
+        return fecha
 
 
 class ConfiguracionAplicadaTurnoFormTests(TestCase):

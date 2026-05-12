@@ -72,7 +72,13 @@ class DisponibilidadListView(DisponibilidadQuerySetMixin, ListView):
 
         dias_validos = {str(value) for value, _label in DiaSemana.choices}
         if self.dia_semana in dias_validos:
-            queryset = queryset.filter(dia_semana=int(self.dia_semana))
+            dia_semana = int(self.dia_semana)
+            ids = [
+                disponibilidad.pk
+                for disponibilidad in queryset
+                if disponibilidad.incluye_dia(dia_semana)
+            ]
+            queryset = queryset.filter(pk__in=ids)
 
         if self.estado == "activa":
             queryset = queryset.filter(activo=True)
