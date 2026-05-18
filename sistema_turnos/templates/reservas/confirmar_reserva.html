@@ -1,0 +1,78 @@
+{% extends "reservas/base_publica.html" %}
+
+{% block title %}Confirmar reserva - {{ negocio.nombre_visible }}{% endblock %}
+
+{% block content %}
+<section class="reservas-card">
+    <div class="reservas-section-head">
+        <p class="reservas-kicker">Paso 2 de 2</p>
+        <h1>Confirma tu reserva</h1>
+    </div>
+
+    <div class="reservas-summary">
+        <div>
+            <span>Negocio</span>
+            <strong>{{ negocio.nombre_visible }}</strong>
+        </div>
+        <div>
+            <span>Servicio</span>
+            <strong>{{ servicio.nombre }}</strong>
+        </div>
+        <div>
+            <span>Sucursal</span>
+            <strong>{{ sucursal.nombre }}</strong>
+        </div>
+        <div>
+            <span>Profesional</span>
+            <strong>{{ profesional.nombre_visible }}</strong>
+        </div>
+        <div>
+            <span>Fecha</span>
+            <strong>{{ slot.fecha_hora_inicio|date:"d/m/Y" }}</strong>
+        </div>
+        <div>
+            <span>Hora</span>
+            <strong>{{ slot.label_hora }} a {{ slot.label_fin }}</strong>
+        </div>
+        <div>
+            <span>Estado esperado</span>
+            <strong>{{ estado_esperado }}</strong>
+        </div>
+    </div>
+
+    <form class="reservas-form" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="sucursal" value="{{ sucursal.pk }}">
+        <input type="hidden" name="servicio" value="{{ servicio.pk }}">
+        <input type="hidden" name="profesional" value="{{ profesional.pk }}">
+        <input type="hidden" name="inicio" value="{{ slot.value_inicio }}">
+        <div class="reservas-honeypot" aria-hidden="true">
+            <label for="{{ form.website.id_for_label }}">Website</label>
+            {{ form.website }}
+        </div>
+
+        {% if form.non_field_errors %}
+            <div class="reservas-error">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="reservas-form-grid">
+            {% for field in form %}
+                {% if field.name != "website" %}
+                    <div class="reservas-field {% if field.name == 'observaciones' %}reservas-field-full{% endif %}">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div class="reservas-field-error">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="reservas-actions reservas-actions-between">
+            <a class="reservas-secondary-link" href="{% url 'reservas:seleccionar_turno' negocio.slug %}">Elegir otro horario</a>
+            <button class="reservas-cta" type="submit">Confirmar reserva</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

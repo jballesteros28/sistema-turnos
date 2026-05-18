@@ -14,6 +14,7 @@ from profesional.models import EstadoProfesional, Profesional
 from servicio.models import EstadoServicio, Servicio
 from sucursal.models import EstadoSucursal, Sucursal
 from turnos.models import EstadoTurno, Turno
+from reservas.services import negocio_permite_reserva_online
 from usuarios.permissions import (
     filtrar_por_negocios_gestionables,
     filtrar_por_negocios_operacion,
@@ -192,6 +193,25 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 }
             )
 
+        reserva_publica_links = []
+        for negocio in negocios.filter(estado=EstadoNegocio.ACTIVO).order_by(
+            "nombre_visible",
+            "nombre",
+        )[:6]:
+            if not negocio_permite_reserva_online(negocio):
+                continue
+            path = reverse(
+                "reservas:negocio_publico",
+                kwargs={"negocio_slug": negocio.slug},
+            )
+            reserva_publica_links.append(
+                {
+                    "negocio": negocio,
+                    "path": path,
+                    "url": self.request.build_absolute_uri(path),
+                }
+            )
+
         context.update(
             {
                 "today": today,
@@ -203,6 +223,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 "hay_negocios": negocios.exists(),
                 "usuario_sin_negocios": not usuario_tiene_membresias(user),
                 "quick_actions": quick_actions,
+                "reserva_publica_links": reserva_publica_links,
             }
         )
         return context

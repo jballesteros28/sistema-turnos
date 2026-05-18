@@ -10,7 +10,7 @@ def enviar_email_turno_creado(turno):
     return _enviar_email_turno(
         turno,
         tipo=TipoNotificacionEmail.TURNO_CREADO,
-        asunto=f"Turno creado - {turno.negocio.nombre}",
+        asunto=f"Turno creado - {turno.negocio.nombre_visible}",
         template_base="turno_creado",
     )
 
@@ -19,7 +19,7 @@ def enviar_email_turno_confirmado(turno):
     return _enviar_email_turno(
         turno,
         tipo=TipoNotificacionEmail.TURNO_CONFIRMADO,
-        asunto=f"Turno confirmado - {turno.negocio.nombre}",
+        asunto=f"Turno confirmado - {turno.negocio.nombre_visible}",
         template_base="turno_confirmado",
     )
 
@@ -29,7 +29,7 @@ def enviar_email_turno_cancelado(turno, motivo=None):
     return _enviar_email_turno(
         turno,
         tipo=TipoNotificacionEmail.TURNO_CANCELADO,
-        asunto=f"Turno cancelado - {turno.negocio.nombre}",
+        asunto=f"Turno cancelado - {turno.negocio.nombre_visible}",
         template_base="turno_cancelado",
         contexto_extra=contexto_extra,
     )
@@ -39,7 +39,7 @@ def enviar_email_turno_completado(turno):
     return _enviar_email_turno(
         turno,
         tipo=TipoNotificacionEmail.TURNO_COMPLETADO,
-        asunto=f"Turno completado - {turno.negocio.nombre}",
+        asunto=f"Turno completado - {turno.negocio.nombre_visible}",
         template_base="turno_completado",
     )
 
@@ -48,7 +48,7 @@ def enviar_email_turno_ausente(turno):
     return _enviar_email_turno(
         turno,
         tipo=TipoNotificacionEmail.TURNO_AUSENTE,
-        asunto=f"Ausencia registrada - {turno.negocio.nombre}",
+        asunto=f"Ausencia registrada - {turno.negocio.nombre_visible}",
         template_base="turno_ausente",
     )
 
@@ -140,7 +140,7 @@ def _get_contexto_turno(turno):
         "cliente": turno.cliente,
         "cliente_nombre": turno.cliente.nombre_visible,
         "negocio": turno.negocio,
-        "negocio_nombre": turno.negocio.nombre,
+        "negocio_nombre": turno.negocio.nombre_visible,
         "servicio": turno.servicio,
         "profesional": turno.profesional,
         "sucursal": turno.sucursal,

@@ -1,0 +1,12 @@
+{% extends "reservas/base_publica.html" %}
+
+{% block title %}Horario no disponible - {{ negocio.nombre_visible }}{% endblock %}
+
+{% block content %}
+<section class="reservas-card reservas-result">
+    <p class="reservas-kicker">Horario no disponible</p>
+    <h1>Ese turno ya no esta disponible</h1>
+    <p class="reservas-lead">Puede haberse reservado hace instantes o haber cambiado la disponibilidad. Elegi otro horario para continuar.</p>
+    <a class="reservas-cta" href="{% url 'reservas:seleccionar_turno' negocio.slug %}">Elegir otro horario</a>
+</section>
+{% endblock %}

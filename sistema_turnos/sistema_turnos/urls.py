@@ -37,6 +37,7 @@ urlpatterns = [
     path('negocio/', RedirectView.as_view(pattern_name='negocios:lista', permanent=False)),
     path('profesionales/', include('profesional.urls')),
     path('profesional/', RedirectView.as_view(pattern_name='profesionales:lista', permanent=False)),
+    path('', include('reservas.urls')),
     path('servicios/', include('servicio.urls')),
     path('servicio/', RedirectView.as_view(pattern_name='servicios:lista', permanent=False)),
     path('sucursales/', include('sucursal.urls')),

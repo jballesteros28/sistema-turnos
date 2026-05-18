@@ -1,7 +1,9 @@
 from datetime import timedelta
+from io import StringIO
 from unittest.mock import patch
 
 from django.core import mail
+from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
@@ -179,3 +181,18 @@ class NotificacionesEmailTurnoTests(TestCase):
             fecha_hora_fin=inicio + timedelta(minutes=domain.servicio.duracion_minutos),
             estado=EstadoTurno.SOLICITADO,
         )
+
+
+class ProbarEmailCommandTests(TestCase):
+    @override_settings(
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        DEFAULT_FROM_EMAIL="no-reply@sistema-turnos.local",
+    )
+    def test_probar_email_envia_mensaje_con_backend_configurado(self):
+        salida = StringIO()
+
+        call_command("probar_email", "destino@example.test", stdout=salida)
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("Prueba de email - Sistema de Turnos", mail.outbox[0].subject)
+        self.assertIn("Email de prueba enviado correctamente", salida.getvalue())

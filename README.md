@@ -18,6 +18,7 @@ diaria/semanal.
 - `agenda`: vista diaria y semanal filtrable de turnos.
 - `configuracion_negocio`: parametros operativos del negocio.
 - `notificaciones`: registro y envio basico de emails de eventos de turnos.
+- `reservas`: flujo publico online para que clientes finales reserven turnos.
 - `usuarios`: membresias entre usuarios Django, negocios y roles de acceso.
 
 ## Flujo operativo
@@ -33,6 +34,31 @@ diaria/semanal.
 9. Ajustar la configuracion operativa del negocio.
 10. Crear y operar turnos.
 11. Consultar la agenda diaria o semanal.
+
+## Reserva publica online
+
+El flujo publico permite reservar sin entrar al panel interno:
+
+- Ruta base: `/reservar/<negocio_slug>/`
+- Ejemplo con datos demo: `/reservar/negocio-demo/`
+- Seleccion de turno: sucursal, servicio, profesional opcional y fecha.
+- Confirmacion: datos del cliente, email o telefono obligatorio y
+  observaciones opcionales.
+- El sistema calcula slots reales, recalcula disponibilidad al confirmar,
+  crea o reutiliza el cliente del negocio, crea el turno con origen `online` y
+  envia el email de turno creado cuando corresponde.
+
+Para probarlo en desarrollo local:
+
+```bash
+cd sistema_turnos
+python manage.py crear_usuarios_demo
+python manage.py runserver
+```
+
+Luego abrir `/reservar/negocio-demo/`. Este flujo no requiere login y no muestra
+la navegacion privada. El backoffice sigue siendo privado y mantiene login en
+`/dashboard/`, `/turnos/` y `/agenda/turnos/`.
 
 ## Autenticacion y multinegocio
 
@@ -140,18 +166,18 @@ Credenciales solo para desarrollo local. No deben usarse en produccion.
 - `/agenda/turnos/`
 - `/agenda/semanal/`
 - `/configuracion/`
+- `/reservar/<negocio_slug>/`
+- `/reservar/<negocio_slug>/turno/`
+- `/reservar/<negocio_slug>/confirmar/`
+- `/reservar/<negocio_slug>/exito/`
 
-## Notificaciones por email
+## Configuracion de email
 
 El sistema envia emails basicos para eventos principales de turnos usando el
-email nativo de Django. En desarrollo el backend por defecto escribe los
-mensajes en consola:
+email nativo de Django. Toda credencial debe configurarse por variables de
+entorno; no se deben hardcodear datos reales en el repositorio.
 
-```python
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-```
-
-Variables de entorno disponibles para configurar SMTP en el futuro:
+### Variables necesarias
 
 - `EMAIL_BACKEND`
 - `EMAIL_HOST`
@@ -162,9 +188,50 @@ Variables de entorno disponibles para configurar SMTP en el futuro:
 - `EMAIL_USE_SSL`
 - `DEFAULT_FROM_EMAIL`
 
-`DEFAULT_FROM_EMAIL` usa por defecto
-`no-reply@sistema-turnos.local`. No se deben hardcodear credenciales reales en
-el repositorio.
+### Modo local con consola
+
+En desarrollo el backend por defecto escribe los mensajes en consola:
+
+```python
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "no-reply@sistema-turnos.local"
+```
+
+Ejemplo en `.env` local:
+
+```env
+EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+DEFAULT_FROM_EMAIL=no-reply@sistema-turnos.local
+```
+
+### Modo SMTP real
+
+Para enviar por SMTP real, configurar estas variables en el entorno de
+produccion o del proceso:
+
+```env
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.tu-proveedor.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=tu-email@dominio.com
+EMAIL_HOST_PASSWORD=tu-password-o-app-password
+EMAIL_USE_TLS=True
+EMAIL_USE_SSL=False
+DEFAULT_FROM_EMAIL=Sistema de Turnos <tu-email@dominio.com>
+```
+
+### Probar configuracion
+
+Desde la carpeta del proyecto Django:
+
+```bash
+python manage.py probar_email correo@ejemplo.com
+```
+
+Con el backend de consola, el email se imprime en la terminal. Con SMTP, el
+comando intenta enviarlo usando la configuracion actual.
+
+No commitear `.env`. No usar credenciales reales en `.env.example`.
 
 Eventos que disparan email en esta etapa:
 
@@ -307,6 +374,7 @@ python manage.py check
 python manage.py check --deploy
 python manage.py test
 python manage.py makemigrations --check --dry-run
+python manage.py probar_email test@example.com
 python manage.py collectstatic --noinput
 python manage.py crear_usuarios_demo
 ```

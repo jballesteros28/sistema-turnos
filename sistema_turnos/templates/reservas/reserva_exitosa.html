@@ -1,0 +1,53 @@
+{% extends "reservas/base_publica.html" %}
+
+{% block title %}Reserva confirmada - {{ negocio.nombre_visible }}{% endblock %}
+
+{% block content %}
+<section class="reservas-card reservas-result">
+    <p class="reservas-kicker">Reserva recibida</p>
+    <h1>Tu reserva fue creada</h1>
+
+    {% if turno %}
+        <div class="reservas-summary">
+            <div>
+                <span>Cliente</span>
+                <strong>{{ turno.cliente.nombre_visible }}</strong>
+            </div>
+            <div>
+                <span>Servicio</span>
+                <strong>{{ turno.servicio.nombre }}</strong>
+            </div>
+            <div>
+                <span>Profesional</span>
+                <strong>{{ turno.profesional.nombre_visible }}</strong>
+            </div>
+            <div>
+                <span>Estado</span>
+                <strong>{{ turno.get_estado_display }}</strong>
+            </div>
+            <div>
+                <span>Fecha</span>
+                <strong>{{ turno.fecha_hora_inicio|date:"d/m/Y" }}</strong>
+            </div>
+            <div>
+                <span>Hora</span>
+                <strong>{{ turno.fecha_hora_inicio|date:"H:i" }}</strong>
+            </div>
+        </div>
+        <p class="reservas-lead">
+            Recibimos tu solicitud para {{ turno.sucursal.nombre }}. El estado actual del turno es {{ turno.get_estado_display|lower }}.
+        </p>
+        {% if email_enviado %}
+            <p class="reservas-note">Te enviamos un email con los datos del turno.</p>
+        {% elif email_estado == "fallido" %}
+            <p class="reservas-note reservas-note-warning">La reserva fue creada, pero no pudimos enviar el email de confirmacion.</p>
+        {% elif email_estado == "sin_email" %}
+            <p class="reservas-note">No enviamos email porque no informaste una direccion de email.</p>
+        {% endif %}
+    {% else %}
+        <p class="reservas-lead">La reserva se completo correctamente.</p>
+    {% endif %}
+
+    <a class="reservas-cta" href="{% url 'reservas:negocio_publico' negocio.slug %}">Volver al inicio</a>
+</section>
+{% endblock %}

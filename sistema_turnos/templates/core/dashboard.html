@@ -126,6 +126,35 @@
         </div>
     {% endif %}
 
+    {% if reserva_publica_links %}
+        <section class="panel dashboard-panel" aria-labelledby="links-reserva-publica">
+            <h2 class="dashboard-panel-title" id="links-reserva-publica">
+                <span class="dashboard-panel-icon"><i class="fa-solid fa-link" aria-hidden="true"></i></span>
+                <span>Reserva publica</span>
+            </h2>
+            <div class="dashboard-reservas">
+                {% for item in reserva_publica_links %}
+                    <article class="dashboard-reserva-item">
+                        <div>
+                            <strong>{{ item.negocio.nombre_visible }}</strong>
+                            <code>{{ item.path }}</code>
+                        </div>
+                        <div class="dashboard-reserva-actions">
+                            <a class="button" href="{{ item.path }}" target="_blank" rel="noopener">
+                                <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                                Abrir
+                            </a>
+                            <button class="button button-secondary" type="button" data-copy-text="{{ item.url }}">
+                                <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                                <span data-copy-label>Copiar link</span>
+                            </button>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+
     {% if quick_actions %}
         <section class="panel dashboard-panel dashboard-actions-panel" aria-labelledby="accesos-rapidos">
             <h2 class="dashboard-panel-title" id="accesos-rapidos">

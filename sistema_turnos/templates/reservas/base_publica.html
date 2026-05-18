@@ -1,0 +1,38 @@
+<!doctype html>
+{% load static %}
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Reserva online{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/reservas.css' %}">
+    <script src="{% static 'js/reservas.js' %}" defer></script>
+</head>
+<body class="reservas-page" data-color-primario="{{ negocio.color_primario|default:'' }}">
+    <main class="reservas-shell">
+        <header class="reservas-header">
+            <a class="reservas-brand" href="{% url 'reservas:negocio_publico' negocio.slug %}">
+                {% if negocio.logo %}
+                    <img class="reservas-logo" src="{{ negocio.logo.url }}" alt="{{ negocio.nombre_visible }}">
+                {% else %}
+                    <span class="reservas-logo reservas-logo-text">{{ negocio.nombre_visible|first }}</span>
+                {% endif %}
+                <span>
+                    <strong>{{ negocio.nombre_visible }}</strong>
+                    {% if negocio.ciudad %}
+                        <small>{{ negocio.ciudad }}</small>
+                    {% endif %}
+                </span>
+            </a>
+            {% if negocio.telefono_principal or negocio.email_principal %}
+                <div class="reservas-contacto">
+                    {% if negocio.telefono_principal %}<span>{{ negocio.telefono_principal }}</span>{% endif %}
+                    {% if negocio.email_principal %}<span>{{ negocio.email_principal }}</span>{% endif %}
+                </div>
+            {% endif %}
+        </header>
+
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

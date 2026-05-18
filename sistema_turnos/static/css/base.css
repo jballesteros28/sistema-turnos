@@ -622,6 +622,44 @@ button.button-danger:hover {
     padding: 0;
 }
 
+.public-reservation-box {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 14px;
+    align-items: center;
+}
+
+.public-reservation-link {
+    min-width: 0;
+    display: grid;
+    gap: 5px;
+}
+
+.public-reservation-link span {
+    color: var(--color-muted);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.public-reservation-link code,
+.dashboard-reserva-item code {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    border-radius: var(--radius-sm);
+    padding: 6px 8px;
+    background: var(--color-surface-subtle);
+    color: var(--color-base);
+    font-size: 13px;
+}
+
+.public-reservation-actions,
+.dashboard-reserva-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
 /* Forms */
 .toolbar {
     display: grid;
@@ -1091,7 +1129,8 @@ td.empty::before,
 
     .toolbar,
     .detail-grid,
-    .form-grid {
+    .form-grid,
+    .public-reservation-box {
         grid-template-columns: 1fr;
     }
 

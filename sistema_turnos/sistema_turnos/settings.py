@@ -89,6 +89,7 @@ INSTALLED_APPS = [
     'negocio',
     'notificaciones',
     'profesional',
+    'reservas',
     'servicio',
     'sucursal',
     'usuarios'

@@ -60,6 +60,30 @@
 {% endif %}
 
 <section class="panel">
+    <h2>Reserva publica</h2>
+    {% if reserva_publica_habilitada %}
+        <div class="public-reservation-box">
+            <div class="public-reservation-link">
+                <span>Link de reserva</span>
+                <code>{{ reserva_publica_path }}</code>
+            </div>
+            <div class="public-reservation-actions">
+                <a class="button" href="{{ reserva_publica_path }}" target="_blank" rel="noopener">
+                    <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                    Abrir
+                </a>
+                <button class="button button-secondary" type="button" data-copy-text="{{ reserva_publica_url }}">
+                    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                    <span data-copy-label>Copiar link de reserva</span>
+                </button>
+            </div>
+        </div>
+    {% else %}
+        <p class="empty">La reserva publica no esta disponible para este negocio.</p>
+    {% endif %}
+</section>
+
+<section class="panel">
     <h2>Datos del negocio</h2>
     <dl class="detail-grid">
         <div class="detail-item">

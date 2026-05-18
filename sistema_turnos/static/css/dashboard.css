@@ -130,6 +130,28 @@
     gap: 12px;
 }
 
+.dashboard-reservas {
+    display: grid;
+    gap: 12px;
+}
+
+.dashboard-reserva-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    background: #fbfdff;
+}
+
+.dashboard-reserva-item > div:first-child {
+    min-width: 0;
+    display: grid;
+    gap: 6px;
+}
+
 .dashboard-actions .button {
     width: 100%;
     min-height: 46px;
@@ -156,7 +178,8 @@
     }
 
     .metric-grid,
-    .dashboard-actions {
+    .dashboard-actions,
+    .dashboard-reserva-item {
         grid-template-columns: 1fr;
     }
 }

@@ -1,0 +1,83 @@
+{% extends "reservas/base_publica.html" %}
+
+{% block title %}Elegir turno - {{ negocio.nombre_visible }}{% endblock %}
+
+{% block content %}
+<section class="reservas-card">
+    <div class="reservas-section-head">
+        <p class="reservas-kicker">Paso 1 de 2</p>
+        <h1>Elegi tu turno</h1>
+    </div>
+
+    {% if not hay_sucursales %}
+        <div class="reservas-empty">
+            <strong>No hay sucursales disponibles para reservar online.</strong>
+            <span>Comunicate con el negocio para consultar opciones.</span>
+        </div>
+    {% elif not hay_servicios %}
+        <div class="reservas-empty">
+            <strong>No hay servicios disponibles para reservar online.</strong>
+            <span>Comunicate con el negocio para consultar opciones.</span>
+        </div>
+    {% elif not hay_profesionales %}
+        <div class="reservas-empty">
+            <strong>No hay profesionales disponibles para esa seleccion.</strong>
+            <span>Proba con otra sucursal o servicio, o comunicate con el negocio.</span>
+        </div>
+    {% endif %}
+
+    <form class="reservas-form" method="get">
+        {% if form.non_field_errors %}
+            <div class="reservas-error">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="reservas-form-grid">
+            {% for field in form %}
+                <div class="reservas-field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="reservas-field-error">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="reservas-actions">
+            <button class="reservas-cta" type="submit">Ver horarios</button>
+        </div>
+    </form>
+</section>
+
+{% if busqueda_realizada and form.is_valid %}
+    <section class="reservas-card reservas-slots-card">
+        <div class="reservas-section-head">
+            <p class="reservas-kicker">Horarios disponibles</p>
+            <h2>{{ form.cleaned_data.fecha }}</h2>
+        </div>
+
+        {% if slots %}
+            <div class="reservas-slots-grid">
+                {% for slot in slots %}
+                    <form method="get" action="{% url 'reservas:confirmar_reserva' negocio.slug %}">
+                        <input type="hidden" name="sucursal" value="{{ form.cleaned_data.sucursal.pk }}">
+                        <input type="hidden" name="servicio" value="{{ form.cleaned_data.servicio.pk }}">
+                        <input type="hidden" name="profesional" value="{{ slot.profesional.pk }}">
+                        <input type="hidden" name="inicio" value="{{ slot.value_inicio }}">
+                        <button class="reservas-slot-button" type="submit">
+                            <strong>{{ slot.label_hora }}</strong>
+                            <span>{{ slot.profesional.nombre_visible }}</span>
+                            <small>Hasta {{ slot.label_fin }}</small>
+                        </button>
+                    </form>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="reservas-empty">
+                <strong>No hay horarios disponibles para esa fecha y seleccion.</strong>
+                <span>Proba con otra fecha, servicio o profesional.</span>
+            </div>
+        {% endif %}
+    </section>
+{% endif %}
+{% endblock %}

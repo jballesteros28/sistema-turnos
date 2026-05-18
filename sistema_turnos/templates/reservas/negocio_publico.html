@@ -1,0 +1,79 @@
+{% extends "reservas/base_publica.html" %}
+
+{% block title %}Reservar en {{ negocio.nombre_visible }}{% endblock %}
+
+{% block content %}
+<section class="reservas-card reservas-hero">
+    <div class="reservas-hero-copy">
+        <p class="reservas-kicker">Reserva online</p>
+        <h1>{{ negocio.nombre_visible }}</h1>
+        {% if negocio.descripcion %}
+            <p class="reservas-lead">{{ negocio.descripcion }}</p>
+        {% else %}
+            <p class="reservas-lead">Elegi un servicio, una fecha y un horario disponible.</p>
+        {% endif %}
+        <a class="reservas-cta" href="{% url 'reservas:seleccionar_turno' negocio.slug %}">Reservar turno</a>
+    </div>
+
+    <div class="reservas-info-panel">
+        {% if negocio.direccion_principal %}
+            <div>
+                <span>Direccion</span>
+                <strong>{{ negocio.direccion_principal }}</strong>
+            </div>
+        {% endif %}
+        {% if negocio.whatsapp_principal %}
+            <div>
+                <span>WhatsApp</span>
+                <strong>{{ negocio.whatsapp_principal }}</strong>
+            </div>
+        {% endif %}
+        {% if negocio.sitio_web %}
+            <div>
+                <span>Sitio web</span>
+                <strong>{{ negocio.sitio_web }}</strong>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="reservas-band">
+    {% if not hay_servicios %}
+        <div class="reservas-empty">
+            <strong>Por ahora no hay servicios disponibles para reservar online.</strong>
+            <span>Comunicate con el negocio para coordinar tu turno.</span>
+        </div>
+    {% else %}
+        <div class="reservas-section-head">
+            <h2>Servicios disponibles</h2>
+        </div>
+        <div class="reservas-list">
+            {% for servicio in servicios %}
+                <article class="reservas-list-item">
+                    <strong>{{ servicio.nombre }}</strong>
+                    <span>{{ servicio.duracion_minutos }} min{% if servicio.precio %} - {{ servicio.precio }} {{ negocio.moneda }}{% endif %}</span>
+                </article>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if not hay_sucursales %}
+        <div class="reservas-empty reservas-empty-spaced">
+            <strong>Por ahora no hay sucursales disponibles para reservar online.</strong>
+            <span>Comunicate con el negocio para consultar disponibilidad.</span>
+        </div>
+    {% else %}
+        <div class="reservas-section-head reservas-section-head-spaced">
+            <h2>Sucursales</h2>
+        </div>
+        <div class="reservas-list">
+            {% for sucursal in sucursales %}
+                <article class="reservas-list-item">
+                    <strong>{{ sucursal.nombre }}</strong>
+                    <span>{{ sucursal.direccion }}{% if sucursal.ciudad %}, {{ sucursal.ciudad }}{% endif %}</span>
+                </article>
+            {% endfor %}
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

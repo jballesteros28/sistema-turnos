@@ -11,6 +11,7 @@ from usuarios.mixins import (
     SuperadminRequiredMixin,
 )
 from usuarios.permissions import get_negocios_visibles
+from reservas.services import negocio_permite_reserva_online
 
 from .forms import NegocioForm
 from .models import EstadoNegocio, Negocio, TipoNegocio
@@ -71,7 +72,18 @@ class NegocioDetailView(NegocioQuerySetMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        reserva_publica_path = reverse(
+            "reservas:negocio_publico",
+            kwargs={"negocio_slug": self.object.slug},
+        )
         context["configuracion"] = getattr(self.object, "configuracion", None)
+        context["reserva_publica_path"] = reserva_publica_path
+        context["reserva_publica_url"] = self.request.build_absolute_uri(
+            reserva_publica_path
+        )
+        context["reserva_publica_habilitada"] = negocio_permite_reserva_online(
+            self.object
+        )
         return context
 
 
