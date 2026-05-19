@@ -1,3 +1,4 @@
+import os
 from datetime import time
 
 from django.contrib.auth import get_user_model
@@ -21,7 +22,26 @@ DIAS_DEMO = [0, 1, 2, 3, 4]
 class Command(BaseCommand):
     help = "Crea usuarios y datos minimos de demo para desarrollo local."
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--render-safe",
+            action="store_true",
+            help=(
+                "Modo idempotente para deploy. Solo crea datos demo si "
+                "CREATE_DEMO_USERS=True."
+            ),
+        )
+
     def handle(self, *args, **options):
+        render_safe = options["render_safe"]
+        if render_safe and not _env_bool("CREATE_DEMO_USERS", False):
+            self.stdout.write(
+                self.style.WARNING(
+                    "Usuarios demo no creados: CREATE_DEMO_USERS no esta en True."
+                )
+            )
+            return
+
         negocio = self._ensure_negocio()
         sucursal = self._ensure_sucursal(negocio)
         servicio = self._ensure_servicio(negocio)
@@ -88,7 +108,8 @@ class Command(BaseCommand):
         self.stdout.write(f"Cliente: {cliente.nombre_visible}")
         self.stdout.write(f"Disponibilidad: {disponibilidad}")
         self.stdout.write(f"Configuracion: {configuracion}")
-        self.stdout.write(f"Password demo: {DEMO_PASSWORD}")
+        if not render_safe:
+            self.stdout.write("Password demo: documentada en README.")
 
     def _ensure_user(self, username, email, *, is_superuser=False):
         User = get_user_model()
@@ -239,3 +260,15 @@ class Command(BaseCommand):
             },
         )
         return miembro
+
+
+def _env_bool(name, default=False):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    normalized = value.strip().lower()
+    if normalized in ("1", "true", "yes", "y", "on"):
+        return True
+    if normalized in ("0", "false", "no", "n", "off"):
+        return False
+    return default

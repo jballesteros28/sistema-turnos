@@ -14,9 +14,22 @@ import os
 from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+ENV_PATHS = [
+    BASE_DIR / ".env",
+    BASE_DIR.parent / ".env",
+]
+ENV_FILE = None
+
+for env_path in ENV_PATHS:
+    if env_path.exists():
+        load_dotenv(env_path, override=True)
+        ENV_FILE = env_path
+        break
 
 
 def get_bool_env(name, default=False):
@@ -40,6 +53,10 @@ def get_int_env(name, default):
         return int(value)
     except ValueError:
         return default
+
+
+env_bool = get_bool_env
+env_int = get_int_env
 
 
 def get_list_env(name, default=""):
@@ -97,6 +114,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -197,6 +215,19 @@ USE_TZ = True
 STATIC_URL = os.getenv("STATIC_URL") or "/static/"
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATICFILES_BACKEND = (
+    "django.contrib.staticfiles.storage.StaticFilesStorage"
+    if DEBUG
+    else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+)
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": STATICFILES_BACKEND,
+    },
+}
 
 MEDIA_URL = os.getenv("MEDIA_URL") or "/media/"
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -216,6 +247,7 @@ DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL") or (
 )
 
 SECURE_SSL_REDIRECT = get_bool_env("SECURE_SSL_REDIRECT", False)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = get_bool_env("SESSION_COOKIE_SECURE", False)
 CSRF_COOKIE_SECURE = get_bool_env("CSRF_COOKIE_SECURE", False)
 SECURE_HSTS_SECONDS = get_int_env("SECURE_HSTS_SECONDS", 0)

@@ -171,14 +171,27 @@ Credenciales solo para desarrollo local. No deben usarse en produccion.
 - `/reservar/<negocio_slug>/confirmar/`
 - `/reservar/<negocio_slug>/exito/`
 
-## Configuracion de email
+## Variables de entorno y SMTP
 
-El sistema envia emails basicos para eventos principales de turnos usando el
-email nativo de Django. Toda credencial debe configurarse por variables de
-entorno; no se deben hardcodear datos reales en el repositorio.
+El proyecto carga automaticamente un archivo `.env` al iniciar Django usando
+`python-dotenv` con `override=True` para que, en desarrollo local, el archivo
+`.env` pise variables previas del entorno. El archivo puede estar junto a
+`manage.py` o en la raiz del repositorio. En esta estructura se busca primero
+`sistema_turnos/.env` y luego `.env`.
 
-### Variables necesarias
+El archivo real `.env` no debe commitearse; usar `.env.example` como guia.
 
+La configuracion se lee con `os.getenv()` y se castea donde corresponde:
+`DJANGO_DEBUG`, `EMAIL_USE_TLS` y `EMAIL_USE_SSL` como booleanos, y
+`EMAIL_PORT` como entero.
+
+Variables principales:
+
+- `DJANGO_SECRET_KEY`
+- `DJANGO_DEBUG`
+- `DJANGO_ALLOWED_HOSTS`
+- `DATABASE_ENGINE`, `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD`,
+  `DATABASE_HOST`, `DATABASE_PORT`
 - `EMAIL_BACKEND`
 - `EMAIL_HOST`
 - `EMAIL_PORT`
@@ -188,50 +201,66 @@ entorno; no se deben hardcodear datos reales en el repositorio.
 - `EMAIL_USE_SSL`
 - `DEFAULT_FROM_EMAIL`
 
-### Modo local con consola
+### Backend de consola
 
-En desarrollo el backend por defecto escribe los mensajes en consola:
-
-```python
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-DEFAULT_FROM_EMAIL = "no-reply@sistema-turnos.local"
-```
-
-Ejemplo en `.env` local:
+Para desarrollo local se puede usar el backend de consola. No envia emails
+reales: imprime el mensaje MIME en la terminal.
 
 ```env
 EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
 DEFAULT_FROM_EMAIL=no-reply@sistema-turnos.local
 ```
 
-### Modo SMTP real
+### Backend SMTP
 
-Para enviar por SMTP real, configurar estas variables en el entorno de
-produccion o del proceso:
+Para SMTP real, usar el backend SMTP de Django y las credenciales del proveedor.
+Ejemplo con Gmail:
 
 ```env
 EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
-EMAIL_HOST=smtp.tu-proveedor.com
+EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
-EMAIL_HOST_USER=tu-email@dominio.com
-EMAIL_HOST_PASSWORD=tu-password-o-app-password
+EMAIL_HOST_USER=tu-email@gmail.com
+EMAIL_HOST_PASSWORD=tu-app-password
 EMAIL_USE_TLS=True
 EMAIL_USE_SSL=False
-DEFAULT_FROM_EMAIL=Sistema de Turnos <tu-email@dominio.com>
+DEFAULT_FROM_EMAIL=tu-email@gmail.com
 ```
+
+Evitar comillas raras, espacios invisibles o espacios al principio/final en
+`EMAIL_HOST_PASSWORD`. Para Gmail, pegar la App Password tal como la entrega
+Google.
+
+`DEFAULT_FROM_EMAIL` tambien puede usar nombre visible:
+
+```env
+DEFAULT_FROM_EMAIL=Sistema de Turnos <tu-email@gmail.com>
+```
+
+Con Gmail no se debe usar la password normal de la cuenta. Hay que activar la
+verificacion en dos pasos y crear una App Password desde la configuracion de la
+cuenta de Google. Esa App Password es el valor de `EMAIL_HOST_PASSWORD`.
 
 ### Probar configuracion
 
 Desde la carpeta del proyecto Django:
 
 ```bash
+python manage.py diagnosticar_env
 python manage.py probar_email correo@ejemplo.com
 ```
 
-Con el backend de consola, el email se imprime en la terminal. Con SMTP, el
-comando intenta enviarlo usando la configuracion actual.
+`diagnosticar_env` muestra `BASE_DIR`, las rutas buscadas, que `.env` fue
+encontrado y los valores principales de email con tipos casteados. Nunca imprime
+la password completa: solo informa si esta cargada y cuantos caracteres tiene.
 
-No commitear `.env`. No usar credenciales reales en `.env.example`.
+`probar_email` muestra backend, host, puerto, usuario, TLS/SSL, remitente y
+estado de password sin imprimirla. Con backend de consola se vera el MIME
+completo en terminal; con SMTP debe intentar enviar un email real y mostrar
+`SUCCESS` si Django reporta el envio. Si SMTP no tiene password cargada, el
+comando corta con un error claro y sugiere revisar `.env` y `diagnosticar_env`.
+
+No usar credenciales reales en `.env.example`.
 
 Eventos que disparan email en esta etapa:
 
@@ -251,8 +280,8 @@ colas asincronicas quedan para una etapa futura.
 El proyecto queda preparado para un deploy controlado mediante variables de
 entorno. No se debe commitear un archivo `.env` real ni credenciales secretas;
 usar `.env.example` como referencia. Django lee variables del entorno del
-proceso; si se usa un archivo `.env`, debe cargarlo la shell, el servicio o la
-plataforma de deploy.
+proceso y, para desarrollo local, carga automaticamente el archivo `.env` si
+existe.
 
 ### Variables de entorno necesarias
 
@@ -360,8 +389,105 @@ python manage.py test
 en produccion.
 
 En produccion, los archivos estaticos recolectados en `staticfiles/` deben ser
-servidos por el servidor web o la plataforma de deploy. Django solo sirve
-archivos `media/` desde `urls.py` cuando `DEBUG=True`.
+servidos por WhiteNoise dentro de Django. Django solo sirve archivos `media/`
+desde `urls.py` cuando `DEBUG=True`.
+
+## Deploy en Render
+
+Render Free no ofrece una shell interactiva persistente para preparar la app,
+por eso el deploy inicial usa `build.sh` para instalar dependencias, recolectar
+estaticos, migrar la base y crear datos iniciales de forma idempotente.
+
+### Pasos
+
+1. Crear una base PostgreSQL en Render.
+2. Crear un Web Service desde GitHub apuntando a este repositorio.
+3. Configurar el Build Command:
+
+```bash
+./build.sh
+```
+
+4. Configurar el Start Command:
+
+```bash
+gunicorn --chdir sistema_turnos sistema_turnos.wsgi:application
+```
+
+El `--chdir sistema_turnos` es necesario porque `manage.py` y el paquete Django
+estan dentro de la carpeta `sistema_turnos/`.
+
+### Variables de entorno
+
+Configurar estas variables en Render, sin commitear `.env` ni secretos:
+
+```env
+DJANGO_SECRET_KEY=
+DJANGO_DEBUG=False
+DJANGO_ALLOWED_HOSTS=tu-app.onrender.com
+DJANGO_CSRF_TRUSTED_ORIGINS=https://tu-app.onrender.com
+
+DATABASE_ENGINE=postgres
+DATABASE_NAME=
+DATABASE_USER=
+DATABASE_PASSWORD=
+DATABASE_HOST=
+DATABASE_PORT=5432
+
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=
+EMAIL_HOST_PASSWORD=
+EMAIL_USE_TLS=True
+EMAIL_USE_SSL=False
+DEFAULT_FROM_EMAIL=
+
+DJANGO_SUPERUSER_USERNAME=
+DJANGO_SUPERUSER_EMAIL=
+DJANGO_SUPERUSER_PASSWORD=
+
+CREATE_DEMO_USERS=True
+
+SECURE_SSL_REDIRECT=True
+SESSION_COOKIE_SECURE=True
+CSRF_COOKIE_SECURE=True
+SECURE_HSTS_SECONDS=31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS=True
+SECURE_HSTS_PRELOAD=True
+```
+
+`crear_superuser_render` usa `DJANGO_SUPERUSER_USERNAME`,
+`DJANGO_SUPERUSER_EMAIL` y `DJANGO_SUPERUSER_PASSWORD`. Si falta alguna, muestra
+un warning y no falla el deploy. Nunca imprime la password.
+
+`crear_usuarios_demo --render-safe` solo crea usuarios y datos demo si
+`CREATE_DEMO_USERS=True`. Para produccion real, usar `CREATE_DEMO_USERS=False` y
+no usar credenciales demo. El comando puede ejecutarse muchas veces: reutiliza
+negocio, sucursal, servicio, profesional, cliente, disponibilidad,
+configuracion, usuarios y membresias existentes.
+
+Si Render presenta problemas de redireccion por proxy con
+`SECURE_SSL_REDIRECT=True`, desactivarlo temporalmente con
+`SECURE_SSL_REDIRECT=False` mientras se revisa la configuracion HTTPS. La
+preferencia para produccion es mantenerlo en `True`. El proyecto ya configura
+`SECURE_PROXY_SSL_HEADER` para reconocer `X-Forwarded-Proto: https`, que es lo
+esperado detras del proxy de Render.
+
+### Static y media
+
+WhiteNoise sirve los archivos estaticos generados por `collectstatic`; no se
+debe commitear `staticfiles/`.
+
+Render Free no ofrece filesystem persistente. `media/` puede funcionar de forma
+temporal, pero para archivos importantes en produccion real se debe usar S3,
+Cloudinary u otro storage externo. No se implementa storage externo todavia.
+
+### URLs a probar
+
+- `/accounts/login/`
+- `/dashboard/`
+- `/reservar/negocio-demo/`
 
 ## Comandos utiles
 
@@ -374,9 +500,12 @@ python manage.py check
 python manage.py check --deploy
 python manage.py test
 python manage.py makemigrations --check --dry-run
+python manage.py diagnosticar_env
 python manage.py probar_email test@example.com
 python manage.py collectstatic --noinput
+python manage.py crear_superuser_render
 python manage.py crear_usuarios_demo
+python manage.py crear_usuarios_demo --render-safe
 ```
 
 ## Notas

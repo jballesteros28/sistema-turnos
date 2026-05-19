@@ -1,9 +1,13 @@
+import logging
+
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils import timezone
 
 from .models import EstadoNotificacionEmail, NotificacionEmail, TipoNotificacionEmail
+
+logger = logging.getLogger(__name__)
 
 
 def enviar_email_turno_creado(turno):
@@ -101,6 +105,7 @@ def enviar_notificacion_email(
             notificacion.estado = EstadoNotificacionEmail.FALLIDO
             notificacion.mensaje_error = "El backend de email no envio el mensaje."
     except Exception as exc:
+        logger.warning("No se pudo enviar la notificacion email de turno: %s", exc)
         notificacion.estado = EstadoNotificacionEmail.FALLIDO
         notificacion.mensaje_error = str(exc)
 
