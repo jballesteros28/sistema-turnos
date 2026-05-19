@@ -7,11 +7,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         password = settings.EMAIL_HOST_PASSWORD or ""
+        database = settings.DATABASES["default"]
 
         self.stdout.write(f"BASE_DIR: {settings.BASE_DIR}")
-        self.stdout.write("Rutas buscadas para .env:")
-        for env_path in settings.ENV_PATHS:
-            self.stdout.write(f"- {env_path}")
+        self.stdout.write(f".env oficial: {settings.ENV_PATH}")
 
         if settings.ENV_FILE:
             self.stdout.write(f".env encontrado: {settings.ENV_FILE}")
@@ -42,7 +41,8 @@ class Command(BaseCommand):
             f"DJANGO_DEBUG: {settings.DEBUG} ({type(settings.DEBUG).__name__})"
         )
         self.stdout.write(f"DJANGO_ALLOWED_HOSTS: {settings.ALLOWED_HOSTS}")
-        self.stdout.write(f"DATABASE_ENGINE: {settings.DATABASE_ENGINE}")
+        self.stdout.write(f"DATABASE_BACKEND: {database.get('ENGINE')}")
+        self.stdout.write(f"DATABASE_IDENTIFIER: {database.get('NAME')}")
 
 
 def _format_loaded(value):

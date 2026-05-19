@@ -3,12 +3,12 @@ from unittest.mock import patch
 
 from django.test import SimpleTestCase, TestCase
 
-from sistema_turnos.settings import get_bool_env, get_int_env, get_list_env
+from sistema_turnos.settings import env_bool, env_int, env_list
 from test_utils import create_superuser
 
 
 class EnvironmentHelperTests(SimpleTestCase):
-    def test_get_bool_env_parsea_true_y_false(self):
+    def test_env_bool_parsea_true_y_false(self):
         with patch.dict(
             os.environ,
             {
@@ -16,23 +16,23 @@ class EnvironmentHelperTests(SimpleTestCase):
                 "ST_FALSE": "off",
             },
         ):
-            self.assertIs(get_bool_env("ST_TRUE"), True)
-            self.assertIs(get_bool_env("ST_FALSE", True), False)
+            self.assertIs(env_bool("ST_TRUE"), True)
+            self.assertIs(env_bool("ST_FALSE", True), False)
 
-    def test_get_bool_env_usa_default_si_el_valor_es_invalido(self):
+    def test_env_bool_usa_default_si_el_valor_es_invalido(self):
         with patch.dict(os.environ, {"ST_INVALID": "quizas"}):
-            self.assertIs(get_bool_env("ST_INVALID", True), True)
+            self.assertIs(env_bool("ST_INVALID", True), True)
 
-    def test_get_list_env_limpia_espacios_y_valores_vacios(self):
+    def test_env_list_limpia_espacios_y_valores_vacios(self):
         with patch.dict(os.environ, {"ST_LIST": "localhost, 127.0.0.1, ,example.com"}):
             self.assertEqual(
-                get_list_env("ST_LIST"),
+                env_list("ST_LIST"),
                 ["localhost", "127.0.0.1", "example.com"],
             )
 
-    def test_get_int_env_usa_default_si_no_es_entero(self):
+    def test_env_int_usa_default_si_no_es_entero(self):
         with patch.dict(os.environ, {"ST_INT": "abc"}):
-            self.assertEqual(get_int_env("ST_INT", 587), 587)
+            self.assertEqual(env_int("ST_INT", 587), 587)
 
 
 class BasicViewStatusTests(TestCase):
